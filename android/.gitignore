@@ -1,0 +1,17 @@
+# Keep the Gradle wrapper in version control so a fresh clone builds without
+# regenerating it. Flutter templates ignore these, but committing them is
+# standard practice for Android projects.
+# gradle-wrapper.jar
+/.gradle
+/captures/
+# /gradlew
+# /gradlew.bat
+/local.properties
+GeneratedPluginRegistrant.java
+.cxx/
+
+# Remember to never publicly share your keystore.
+# See https://flutter.dev/to/reference-keystore
+key.properties
+**/*.keystore
+**/*.jks
