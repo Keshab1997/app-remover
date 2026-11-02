@@ -1,0 +1,29 @@
+Goodbye Apps makes removing unwanted apps quick and clear.
+
+See every app installed on your phone with its icon, package name, size and install date. Sort by name, size or date, search by name or package, and uninstall one app or many at once. System apps are shown separately and marked as protected, so you always know what can and cannot be removed.
+
+WHAT YOU CAN DO
+• Clear list — every app with its size and install date, no clutter
+• Fast removal — multi-select and uninstall several apps in a row
+• Smart sorting — by name, date or size, ascending or descending
+• Instant search — find an app by name or package name
+• Real storage numbers — open an app to see its APK, data and cache size separately (uses usage access, which you turn on yourself)
+• System app awareness — system apps are separated and protected
+• Free memory at a glance — available RAM on every screen, and optionally as an ongoing notification in the status bar
+• Home screen shortcuts — pin the apps you use often
+• Light and dark theme — follows your system or your choice
+• English and Bangla — the app follows your phone's language
+
+HOW IT WORKS
+Goodbye Apps uses the standard Android uninstall dialog. Android always asks you to confirm, so no app is ever removed silently.
+
+PRIVACY
+No account. No analytics. No ads. The app does not send your app list anywhere. It only reads the installed app list on your device so it can show it to you.
+
+PERMISSIONS
+• Installed app list — to show your apps
+• Uninstall requests — to open the system uninstall dialog
+• Usage access (optional) — only to report app, data and cache sizes
+• Notifications (optional) — only if you turn on the status bar feature
+
+Goodbye Apps is a small, focused utility. If something is missing, tell us at hello@goodbyeapps.com.

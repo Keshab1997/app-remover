@@ -44,18 +44,25 @@ spec আছে। প্রতিটা doc-এ **কী বানাতে হ�
 - [x] Settings: rate, share, feedback, privacy, version
 - [x] Package `com.keshabstudios.goodbyeapps`, title "Goodbye Apps – Uninstaller"
 
-## এখনো যা নেই
+## যা এই batch-এ যোগ হয়েছে (code, main-এ push করা)
 
-- [ ] App icon (এখনো Flutter default)
-- [ ] Release signing
-- [ ] `.aab` build verify
-- [ ] Privacy policy hosting
-- [ ] Status bar notification
-- [ ] Icon lazy-loading
-- [ ] Accurate size (data + cache)
-- [ ] Home screen shortcut
-- [ ] Bangla
-- [ ] Ads / Remove Ads
+- [x] Status bar notification — doc 06 (`NotificationHelper.kt`, BootReceiver, Settings toggle)
+- [x] Icon lazy-loading — doc 07 (`IconStore`, প্রতি row-এর icon on demand)
+- [x] Accurate size (data + cache) — doc 08 (`StorageStatsManager`, usage access row)
+- [x] Home screen shortcut — doc 09 (`addShortcut`, action sheet-এ entry)
+- [x] Bangla — doc 10 (`lib/l10n/app_bn.arb`, পুরো UI extract করা)
+- [x] Release signing — `e620419`-এ wire করা আছে
+- [x] Privacy policy **text** — `docs/legal/`-এ host-ready HTML (English + বাংলা)
+- [x] Play listing **copy** — `distribution/listing/`, উত্তর `distribution/app-content-answers.md`
+
+## এখনো যা বাকি (তোমার হাত লাগবে)
+
+- [ ] App icon (এখনো Flutter default) — doc 01
+- [ ] Privacy policy **hosting** + `privacyPolicyUrl` update — file ready, URL বাকি
+- [ ] `.aab` build verify — Actions → *Build Android APK or AAB (Manual)*
+- [ ] Play Console upload — doc 03 (Console-এর ভেতরে ঢুকতে হয়)
+- [ ] Device testing — doc 05
+- [ ] Ads / Remove Ads — doc 11 (AdMob app ID লাগবে)
 
 ## Build command (যখনই দরকার)
 
