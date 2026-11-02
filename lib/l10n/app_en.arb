@@ -1,0 +1,146 @@
+{
+  "@@locale": "en",
+  "appTitle": "Goodbye Apps",
+  "@appTitle": {
+    "description": "Brand name — never translated."
+  },
+  "tabUserApps": "User apps ({count})",
+  "@tabUserApps": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tabSystemApps": "System apps ({count})",
+  "@tabSystemApps": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "loadingApps": "Loading apps…",
+  "searchApps": "Search apps",
+  "@searchApps": {
+    "description": "Search field hint."
+  },
+  "appsNotFound": "Apps not found",
+  "noMatches": "No matches",
+  "pullToRefresh": "Pull down to refresh the list.",
+  "tryDifferentSearch": "Try a different name or package.",
+  "loadFailed": "Could not read the installed app list.",
+  "tryAgain": "Try again",
+  "sort": "Sort",
+  "sortByName": "Sort by name",
+  "sortByDate": "Sort by date",
+  "sortBySize": "Sort by size",
+  "ascending": "Ascending",
+  "descending": "Descending",
+  "toggleSortDirection": "Toggle sort direction",
+  "search": "Search",
+  "clear": "Clear",
+  "cancel": "Cancel",
+  "settings": "Settings",
+  "refresh": "Refresh",
+  "refreshMemory": "Refresh memory",
+  "selectAll": "Select all",
+  "cancelSelection": "Cancel selection",
+  "selectedCount": "{count} selected",
+  "@selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "appsAndSize": "{count} apps • {size}",
+  "@appsAndSize": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "freeMemory": "Free memory",
+  "usedOfTotal": "{used} / {total} used",
+  "@usedOfTotal": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "uninstall": "Uninstall",
+  "uninstallOne": "Uninstall app?",
+  "uninstallMany": "Uninstall {count} apps?",
+  "@uninstallMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "uninstallConfirmBody": "The system will ask you to confirm each uninstall.",
+  "open": "Open",
+  "appInfo": "App info",
+  "searchInPlay": "Search in Google Play",
+  "addToHomeScreen": "Add to home screen",
+  "shortcutRequested": "Confirm the shortcut on the home screen",
+  "shortcutUnsupported": "This app or launcher can't be pinned",
+  "systemAppsProtected": "System apps can't be uninstalled",
+  "versionAndSize": "v{version} • {size}",
+  "@versionAndSize": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "sizeApp": "App",
+  "@sizeApp": {
+    "description": "Column label of the storage breakdown."
+  },
+  "sizeData": "Data",
+  "sizeCache": "Cache",
+  "sectionAppearance": "Appearance",
+  "sectionStatusBar": "Status bar",
+  "sectionStorage": "Storage",
+  "sectionAbout": "About",
+  "theme": "Theme",
+  "systemDefault": "System default",
+  "light": "Light",
+  "dark": "Dark",
+  "statusBarToggle": "Status bar notification",
+  "statusBarOn": "Free memory in the tray, refreshed with the list",
+  "statusBarOff": "Show free memory in the tray",
+  "notificationsOffTitle": "Notifications are off",
+  "notificationsOffBody": "Allow notifications for Goodbye Apps in system settings, then turn this back on.",
+  "openSettings": "Open settings",
+  "detailedAppSizes": "Detailed app sizes",
+  "usageAccessOn": "Usage access is on — sheets show app, data and cache",
+  "usageAccessOff": "Turn on usage access to see data and cache size",
+  "rateApp": "Rate this app",
+  "rateSubtitle": "Give us 5 stars on Google Play",
+  "shareApp": "Share app",
+  "shareBody": "Check out Goodbye Apps – a simple way to uninstall apps.\n{link}",
+  "@shareBody": {
+    "placeholders": {
+      "link": {
+        "type": "String"
+      }
+    }
+  },
+  "sendFeedback": "Send feedback",
+  "privacyPolicy": "Privacy policy",
+  "version": "Version"
+}

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/generated/app_localizations.dart';
 import '../models/app_info.dart';
 import '../services/native_apps.dart';
 import '../state/apps_controller.dart';
@@ -52,16 +53,17 @@ class _HomeScreenState extends State<HomeScreen>
 
   PreferredSizeWidget _appBar() {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return AppBar(
       title: Text(
         _apps.selectionMode
-            ? '${_apps.selected.length} selected'
-            : 'Goodbye Apps',
+            ? l10n.selectedCount(_apps.selected.length)
+            : l10n.appTitle,
       ),
       leading: _apps.selectionMode
           ? IconButton(
               icon: const Icon(Icons.close),
-              tooltip: 'Cancel selection',
+              tooltip: l10n.cancelSelection,
               onPressed: _apps.clearSelection,
             )
           : null,
@@ -69,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen>
           ? [
               IconButton(
                 icon: const Icon(Icons.select_all),
-                tooltip: 'Select all',
+                tooltip: l10n.selectAll,
                 onPressed: () =>
                     _apps.selectAll(_apps.appsFor(system: _tabs.index == 1)),
               ),
@@ -77,22 +79,22 @@ class _HomeScreenState extends State<HomeScreen>
           : [
               IconButton(
                 icon: const Icon(Icons.search),
-                tooltip: 'Search',
+                tooltip: l10n.search,
                 onPressed: () => setState(() => _searching = true),
               ),
               IconButton(
                 icon: const Icon(Icons.sort),
-                tooltip: 'Sort',
+                tooltip: l10n.sort,
                 onPressed: _showSortSheet,
               ),
               IconButton(
                 icon: const Icon(Icons.refresh),
-                tooltip: 'Refresh',
+                tooltip: l10n.refresh,
                 onPressed: _apps.load,
               ),
               IconButton(
                 icon: const Icon(Icons.settings_outlined),
-                tooltip: 'Settings',
+                tooltip: l10n.settings,
                 onPressed: _openSettings,
               ),
             ],
@@ -111,8 +113,8 @@ class _HomeScreenState extends State<HomeScreen>
             tabAlignment: TabAlignment.start,
             dividerColor: Colors.transparent,
             tabs: [
-              Tab(text: 'User apps (${_apps.appsFor(system: false).length})'),
-              Tab(text: 'System apps (${_apps.appsFor(system: true).length})'),
+              Tab(text: l10n.tabUserApps(_apps.appsFor(system: false).length)),
+              Tab(text: l10n.tabSystemApps(_apps.appsFor(system: true).length)),
             ],
           ),
         ),
@@ -121,6 +123,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   PreferredSizeWidget _searchAppBar() {
+    final l10n = AppLocalizations.of(context);
     return AppBar(
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
@@ -133,8 +136,8 @@ class _HomeScreenState extends State<HomeScreen>
       title: TextField(
         controller: _search,
         autofocus: true,
-        decoration: const InputDecoration(
-          hintText: 'Search apps',
+        decoration: InputDecoration(
+          hintText: l10n.searchApps,
           border: InputBorder.none,
         ),
         onChanged: _apps.setQuery,
@@ -142,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen>
       actions: [
         IconButton(
           icon: const Icon(Icons.clear),
-          tooltip: 'Clear',
+          tooltip: l10n.clear,
           onPressed: () {
             _search.clear();
             _apps.setQuery('');
@@ -155,25 +158,26 @@ class _HomeScreenState extends State<HomeScreen>
   // ----------------------------------------------------------------- body
 
   Widget _body() {
+    final l10n = AppLocalizations.of(context);
     if (_apps.loading) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             CircularProgressIndicator(),
             SizedBox(height: 16),
-            Text('Loading apps…'),
+            Text(l10n.loadingApps),
           ],
         ),
       );
     }
-    if (_apps.error != null) {
+    if (_apps.failure != null) {
       return _EmptyState(
         icon: Icons.error_outline,
-        title: _apps.error!,
+        title: l10n.loadFailed,
         action: FilledButton.tonal(
           onPressed: _apps.load,
-          child: const Text('Try again'),
+          child: Text(l10n.tryAgain),
         ),
       );
     }
@@ -184,14 +188,15 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _appList({required bool system}) {
+    final l10n = AppLocalizations.of(context);
     final apps = _apps.appsFor(system: system);
     if (apps.isEmpty) {
       return _EmptyState(
         icon: Icons.apps_outlined,
-        title: _apps.query.isEmpty ? 'Apps not found' : 'No matches',
+        title: _apps.query.isEmpty ? l10n.appsNotFound : l10n.noMatches,
         subtitle: _apps.query.isEmpty
-            ? 'Pull down to refresh the list.'
-            : 'Try a different name or package.',
+            ? l10n.pullToRefresh
+            : l10n.tryDifferentSearch,
       );
     }
     return RefreshIndicator(
@@ -217,6 +222,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _selectionBar() {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return SafeArea(
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 8, 12, 8),
@@ -225,15 +231,17 @@ class _HomeScreenState extends State<HomeScreen>
           children: [
             Expanded(
               child: Text(
-                '${_apps.selected.length} apps • '
-                '${formatBytes(_apps.selectedSize)}',
+                l10n.appsAndSize(
+                  _apps.selected.length,
+                  formatBytes(_apps.selectedSize),
+                ),
                 style: Theme.of(context).textTheme.titleSmall,
               ),
             ),
             FilledButton.icon(
               onPressed: _confirmUninstallSelected,
               icon: const Icon(Icons.delete_outline),
-              label: const Text('Uninstall'),
+              label: Text(l10n.uninstall),
             ),
           ],
         ),
@@ -243,6 +251,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _memoryBar() {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final scheme = theme.colorScheme;
     final used = _apps.totalRam - _apps.freeRam;
     return SafeArea(
@@ -259,7 +268,7 @@ class _HomeScreenState extends State<HomeScreen>
             Icon(Icons.memory, size: 16, color: scheme.onSurfaceVariant),
             const SizedBox(width: 8),
             Text(
-              'Free memory',
+              l10n.freeMemory,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
@@ -274,7 +283,10 @@ class _HomeScreenState extends State<HomeScreen>
             const Spacer(),
             if (_apps.totalRam > 0)
               Text(
-                '${formatBytes(used)} / ${formatBytes(_apps.totalRam)} used',
+                l10n.usedOfTotal(
+                  formatBytes(used),
+                  formatBytes(_apps.totalRam),
+                ),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
@@ -283,7 +295,7 @@ class _HomeScreenState extends State<HomeScreen>
               visualDensity: VisualDensity.compact,
               iconSize: 18,
               icon: const Icon(Icons.refresh),
-              tooltip: 'Refresh memory',
+              tooltip: l10n.refreshMemory,
               onPressed: _apps.refreshMemory,
             ),
           ],
@@ -295,6 +307,7 @@ class _HomeScreenState extends State<HomeScreen>
   // --------------------------------------------------------------- actions
 
   Future<void> _showSortSheet() async {
+    final l10n = AppLocalizations.of(context);
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -305,7 +318,11 @@ class _HomeScreenState extends State<HomeScreen>
             children: [
               for (final field in SortField.values)
                 ListTile(
-                  title: Text('Sort by ${field.label.toLowerCase()}'),
+                  title: Text(switch (field) {
+                    SortField.name => l10n.sortByName,
+                    SortField.date => l10n.sortByDate,
+                    SortField.size => l10n.sortBySize,
+                  }),
                   trailing: _apps.sortField == field
                       ? const Icon(Icons.check, size: 20)
                       : null,
@@ -316,8 +333,8 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               const Divider(height: 1),
               SwitchListTile(
-                title: Text(_apps.ascending ? 'Ascending' : 'Descending'),
-                subtitle: const Text('Toggle sort direction'),
+                title: Text(_apps.ascending ? l10n.ascending : l10n.descending),
+                subtitle: Text(l10n.toggleSortDirection),
                 value: _apps.ascending,
                 onChanged: (_) {
                   _apps.toggleSortOrder();
@@ -333,6 +350,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   Future<void> _showActions(AppInfo app) async {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -349,7 +367,7 @@ class _HomeScreenState extends State<HomeScreen>
                 title: Text(app.label),
                 subtitle: Text(
                   '${app.packageName}\n'
-                  'v${app.versionName} • ${formatBytes(app.sizeBytes)}',
+                  '${l10n.versionAndSize(app.versionName, formatBytes(app.sizeBytes))}',
                 ),
                 isThreeLine: true,
               ),
@@ -357,7 +375,7 @@ class _HomeScreenState extends State<HomeScreen>
               _SizeBreakdown(packageName: app.packageName),
               ListTile(
                 leading: const Icon(Icons.launch),
-                title: const Text('Open'),
+                title: Text(l10n.open),
                 onTap: () {
                   Navigator.pop(sheetContext);
                   NativeApps.launch(app.packageName);
@@ -365,7 +383,7 @@ class _HomeScreenState extends State<HomeScreen>
               ),
               ListTile(
                 leading: const Icon(Icons.info_outline),
-                title: const Text('App info'),
+                title: Text(l10n.appInfo),
                 onTap: () {
                   Navigator.pop(sheetContext);
                   NativeApps.openAppInfo(app.packageName);
@@ -373,7 +391,7 @@ class _HomeScreenState extends State<HomeScreen>
               ),
               ListTile(
                 leading: const Icon(Icons.storefront_outlined),
-                title: const Text('Search in Google Play'),
+                title: Text(l10n.searchInPlay),
                 onTap: () {
                   Navigator.pop(sheetContext);
                   NativeApps.openPlayStore(app.packageName);
@@ -381,7 +399,7 @@ class _HomeScreenState extends State<HomeScreen>
               ),
               ListTile(
                 leading: const Icon(Icons.add_to_home_screen_outlined),
-                title: const Text('Add to home screen'),
+                title: Text(l10n.addToHomeScreen),
                 onTap: () async {
                   Navigator.pop(sheetContext);
                   final ok = await NativeApps.addShortcut(app.packageName);
@@ -393,9 +411,7 @@ class _HomeScreenState extends State<HomeScreen>
                       // false covers both "launcher cannot pin" and "this app
                       // has no launch intent", which the user cannot act on.
                       content: Text(
-                        ok
-                            ? 'Confirm the shortcut on the home screen'
-                            : "This app or launcher can't be pinned",
+                        ok ? l10n.shortcutRequested : l10n.shortcutUnsupported,
                       ),
                     ),
                   );
@@ -408,9 +424,7 @@ class _HomeScreenState extends State<HomeScreen>
                   color: app.isSystem ? null : scheme.error,
                 ),
                 title: Text(
-                  app.isSystem
-                      ? "System apps can't be uninstalled"
-                      : 'Uninstall',
+                  app.isSystem ? l10n.systemAppsProtected : l10n.uninstall,
                   style: app.isSystem ? null : TextStyle(color: scheme.error),
                 ),
                 onTap: app.isSystem
@@ -428,23 +442,24 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<void> _confirmUninstallSelected() async {
+    final l10n = AppLocalizations.of(context);
     final count = _apps.selected.length;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(count == 1 ? 'Uninstall app?' : 'Uninstall $count apps?'),
+        title: Text(count == 1 ? l10n.uninstallOne : l10n.uninstallMany(count)),
         content: Text(
-          '$count apps • ${formatBytes(_apps.selectedSize)}\n'
-          'The system will ask you to confirm each uninstall.',
+          '${l10n.appsAndSize(count, formatBytes(_apps.selectedSize))}\n'
+          '${l10n.uninstallConfirmBody}',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Uninstall'),
+            child: Text(l10n.uninstall),
           ),
         ],
       ),
@@ -473,6 +488,7 @@ class _SizeBreakdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     return FutureBuilder<({int app, int data, int cache, int total})?>(
       future: NativeApps.sizeBreakdown(packageName),
       builder: (context, snapshot) {
@@ -483,9 +499,21 @@ class _SizeBreakdown extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _SizeCell(label: 'App', bytes: breakdown.app, theme: theme),
-              _SizeCell(label: 'Data', bytes: breakdown.data, theme: theme),
-              _SizeCell(label: 'Cache', bytes: breakdown.cache, theme: theme),
+              _SizeCell(
+                label: l10n.sizeApp,
+                bytes: breakdown.app,
+                theme: theme,
+              ),
+              _SizeCell(
+                label: l10n.sizeData,
+                bytes: breakdown.data,
+                theme: theme,
+              ),
+              _SizeCell(
+                label: l10n.sizeCache,
+                bytes: breakdown.cache,
+                theme: theme,
+              ),
             ],
           ),
         );

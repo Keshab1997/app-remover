@@ -92,7 +92,7 @@ void main() {
     await controller.load();
 
     expect(controller.loading, isFalse);
-    expect(controller.error, isNull);
+    expect(controller.failure, isNull);
     expect(controller.installedCount, 5);
     expect(controller.appsFor(system: true).map((a) => a.packageName), [
       'android.systemui',
@@ -110,7 +110,7 @@ void main() {
 
     await controller.load();
 
-    expect(controller.error, 'Could not read the installed app list.');
+    expect(controller.failure, AppLoadFailure.listUnavailable);
     expect(controller.installedCount, 0);
     expect(controller.loading, isFalse);
   });

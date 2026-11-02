@@ -56,14 +56,6 @@ class AppInfo {
 
 enum SortField { name, date, size }
 
-extension SortFieldLabel on SortField {
-  String get label => switch (this) {
-    SortField.name => 'Name',
-    SortField.date => 'Date',
-    SortField.size => 'Size',
-  };
-}
-
 /// Human readable byte size, e.g. 12.4 MB.
 String formatBytes(int bytes) {
   if (bytes <= 0) return '0 B';

@@ -5,6 +5,10 @@ import 'package:flutter/foundation.dart';
 import '../models/app_info.dart';
 import '../services/native_apps.dart';
 
+/// Why the list could not be shown. The words belong to the widget layer:
+/// only `AppLocalizations` knows which language to say them in (docs/10).
+enum AppLoadFailure { listUnavailable }
+
 class AppsController extends ChangeNotifier {
   AppsController() {
     _subscription = NativeApps.packageChanges().listen((_) => load());
@@ -14,7 +18,7 @@ class AppsController extends ChangeNotifier {
 
   List<AppInfo> _all = [];
   bool _loading = true;
-  String? _error;
+  AppLoadFailure? _failure;
   String _query = '';
   SortField _sortField = SortField.name;
   bool _ascending = true;
@@ -23,7 +27,7 @@ class AppsController extends ChangeNotifier {
   int _totalRam = 0;
 
   bool get loading => _loading;
-  String? get error => _error;
+  AppLoadFailure? get failure => _failure;
   String get query => _query;
   SortField get sortField => _sortField;
   bool get ascending => _ascending;
@@ -57,7 +61,7 @@ class AppsController extends ChangeNotifier {
 
   Future<void> load() async {
     _loading = true;
-    _error = null;
+    _failure = null;
     notifyListeners();
     try {
       final apps = await NativeApps.listApps();
@@ -67,7 +71,7 @@ class AppsController extends ChangeNotifier {
       );
       await refreshMemory();
     } catch (e) {
-      _error = 'Could not read the installed app list.';
+      _failure = AppLoadFailure.listUnavailable;
       _all = [];
     } finally {
       _loading = false;

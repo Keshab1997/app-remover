@@ -1,0 +1,239 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Bengali Bangla (`bn`).
+class AppLocalizationsBn extends AppLocalizations {
+  AppLocalizationsBn([String locale = 'bn']) : super(locale);
+
+  @override
+  String get appTitle => 'Goodbye Apps';
+
+  @override
+  String tabUserApps(int count) {
+    return 'ইউজার অ্যাপ ($count)';
+  }
+
+  @override
+  String tabSystemApps(int count) {
+    return 'সিস্টেম অ্যাপ ($count)';
+  }
+
+  @override
+  String get loadingApps => 'অ্যাপ লোড হচ্ছে…';
+
+  @override
+  String get searchApps => 'অ্যাপ খুঁজুন';
+
+  @override
+  String get appsNotFound => 'কোনো অ্যাপ পাওয়া যায়নি';
+
+  @override
+  String get noMatches => 'কিছু পাওয়া যায়নি';
+
+  @override
+  String get pullToRefresh => 'লিস্ট রিফ্রেশ করতে নিচে টানুন।';
+
+  @override
+  String get tryDifferentSearch => 'অন্য নাম বা প্যাকেজ দিয়ে চেষ্টা করুন।';
+
+  @override
+  String get loadFailed => 'ইনস্টল করা অ্যাপের লিস্ট পড়া যায়নি।';
+
+  @override
+  String get tryAgain => 'আবার চেষ্টা করুন';
+
+  @override
+  String get sort => 'সাজান';
+
+  @override
+  String get sortByName => 'নাম অনুযায়ী সাজান';
+
+  @override
+  String get sortByDate => 'তারিখ অনুযায়ী সাজান';
+
+  @override
+  String get sortBySize => 'সাইজ অনুযায়ী সাজান';
+
+  @override
+  String get ascending => 'ছোট থেকে বড়';
+
+  @override
+  String get descending => 'বড় থেকে ছোট';
+
+  @override
+  String get toggleSortDirection => 'সাজানোর দিক বদলান';
+
+  @override
+  String get search => 'খুঁজুন';
+
+  @override
+  String get clear => 'মুছুন';
+
+  @override
+  String get cancel => 'বাতিল';
+
+  @override
+  String get settings => 'সেটিংস';
+
+  @override
+  String get refresh => 'রিফ্রেশ';
+
+  @override
+  String get refreshMemory => 'মেমোরি রিফ্রেশ করুন';
+
+  @override
+  String get selectAll => 'সব নির্বাচন করুন';
+
+  @override
+  String get cancelSelection => 'নির্বাচন বাতিল';
+
+  @override
+  String selectedCount(int count) {
+    return '$countটি নির্বাচিত';
+  }
+
+  @override
+  String appsAndSize(int count, String size) {
+    return '$countটি অ্যাপ • $size';
+  }
+
+  @override
+  String get freeMemory => 'ফ্রি মেমোরি';
+
+  @override
+  String usedOfTotal(String used, String total) {
+    return '$used / $total ব্যবহৃত';
+  }
+
+  @override
+  String get uninstall => 'আনইনস্টল';
+
+  @override
+  String get uninstallOne => 'অ্যাপ আনইনস্টল করবেন?';
+
+  @override
+  String uninstallMany(int count) {
+    return '$countটি অ্যাপ আনইনস্টল করবেন?';
+  }
+
+  @override
+  String get uninstallConfirmBody =>
+      'প্রতিটি আনইনস্টলের জন্য সিস্টেম আবার জিজ্ঞাসা করবে।';
+
+  @override
+  String get open => 'খুলুন';
+
+  @override
+  String get appInfo => 'অ্যাপের তথ্য';
+
+  @override
+  String get searchInPlay => 'Google Play-তে খুঁজুন';
+
+  @override
+  String get addToHomeScreen => 'হোম স্ক্রিনে যোগ করুন';
+
+  @override
+  String get shortcutRequested => 'হোম স্ক্রিনে shortcut নিশ্চিত করুন';
+
+  @override
+  String get shortcutUnsupported => 'এই অ্যাপ বা launcher pin করা যায় না';
+
+  @override
+  String get systemAppsProtected => 'সিস্টেম অ্যাপ আনইনস্টল করা যায় না';
+
+  @override
+  String versionAndSize(String version, String size) {
+    return 'v$version • $size';
+  }
+
+  @override
+  String get sizeApp => 'অ্যাপ';
+
+  @override
+  String get sizeData => 'ডেটা';
+
+  @override
+  String get sizeCache => 'ক্যাশে';
+
+  @override
+  String get sectionAppearance => 'অ্যাপিয়ারেন্স';
+
+  @override
+  String get sectionStatusBar => 'স্ট্যাটাস বার';
+
+  @override
+  String get sectionStorage => 'স্টোরেজ';
+
+  @override
+  String get sectionAbout => 'সম্পর্কে';
+
+  @override
+  String get theme => 'থিম';
+
+  @override
+  String get systemDefault => 'সিস্টেম ডিফল্ট';
+
+  @override
+  String get light => 'লাইট';
+
+  @override
+  String get dark => 'ডার্ক';
+
+  @override
+  String get statusBarToggle => 'স্ট্যাটাস বার নোটিফিকেশন';
+
+  @override
+  String get statusBarOn =>
+      'ট্রে-তে ফ্রি মেমোরি, লিস্ট রিফ্রেশের সাথে আপডেট হয়';
+
+  @override
+  String get statusBarOff => 'ট্রে-তে ফ্রি মেমোরি দেখান';
+
+  @override
+  String get notificationsOffTitle => 'নোটিফিকেশন বন্ধ আছে';
+
+  @override
+  String get notificationsOffBody =>
+      'সিস্টেম সেটিংসে Goodbye Apps-এর নোটিফিকেশন চালু করে, তারপর এটা আবার অন করুন।';
+
+  @override
+  String get openSettings => 'সেটিংস খুলুন';
+
+  @override
+  String get detailedAppSizes => 'বিস্তারিত অ্যাপ সাইজ';
+
+  @override
+  String get usageAccessOn =>
+      'Usage access চালু আছে — শিটে অ্যাপ, ডেটা ও ক্যাশে দেখায়';
+
+  @override
+  String get usageAccessOff =>
+      'ডেটা ও ক্যাশে সাইজ দেখতে usage access চালু করুন';
+
+  @override
+  String get rateApp => 'অ্যাপটি রেট করুন';
+
+  @override
+  String get rateSubtitle => 'Google Play-তে ৫ স্টার দিন';
+
+  @override
+  String get shareApp => 'অ্যাপ শেয়ার করুন';
+
+  @override
+  String shareBody(String link) {
+    return 'Goodbye Apps দেখুন — দুই ট্যাপে অ্যাপ আনইনস্টল করুন।\n$link';
+  }
+
+  @override
+  String get sendFeedback => 'মতামত পাঠান';
+
+  @override
+  String get privacyPolicy => 'প্রাইভেসি পলিসি';
+
+  @override
+  String get version => 'ভার্সন';
+}

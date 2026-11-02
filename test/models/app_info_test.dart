@@ -88,14 +88,6 @@ void main() {
     });
   });
 
-  group('SortFieldLabel', () {
-    test('labels match the sort sheet', () {
-      expect(SortField.name.label, 'Name');
-      expect(SortField.date.label, 'Date');
-      expect(SortField.size.label, 'Size');
-    });
-  });
-
   group('formatBytes', () {
     test('zero and negative sizes read as 0 B', () {
       expect(formatBytes(0), '0 B');

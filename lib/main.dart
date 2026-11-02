@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'l10n/generated/app_localizations.dart';
 import 'screens/home_screen.dart';
 import 'services/settings.dart';
 
@@ -18,7 +19,11 @@ class AppRemoverApp extends StatelessWidget {
       valueListenable: AppSettings.themeMode,
       builder: (context, mode, _) {
         return MaterialApp(
-          title: 'Goodbye Apps',
+          // The launcher label follows the system language; the brand itself
+          // stays English in both locales (docs/10).
+          onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           debugShowCheckedModeBanner: false,
           themeMode: mode,
           theme: _buildTheme(Brightness.light),
