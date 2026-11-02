@@ -54,9 +54,7 @@ class AppRemoverApp extends StatelessWidget {
         elevation: 0,
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         color: scheme.surfaceContainerLow,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }

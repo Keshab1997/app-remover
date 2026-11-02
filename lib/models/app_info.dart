@@ -27,11 +27,11 @@ class AppInfo {
   DateTime get installedAt =>
       DateTime.fromMillisecondsSinceEpoch(firstInstallTime);
 
-  DateTime get updatedAt =>
-      DateTime.fromMillisecondsSinceEpoch(lastUpdateTime);
+  DateTime get updatedAt => DateTime.fromMillisecondsSinceEpoch(lastUpdateTime);
 
   /// Newest of install/update, used for the "Date" sort.
-  DateTime get changedAt => updatedAt.isAfter(installedAt) ? updatedAt : installedAt;
+  DateTime get changedAt =>
+      updatedAt.isAfter(installedAt) ? updatedAt : installedAt;
 
   factory AppInfo.fromMap(dynamic raw) {
     final map = (raw as Map).cast<String, dynamic>();
@@ -60,10 +60,10 @@ enum SortField { name, date, size }
 
 extension SortFieldLabel on SortField {
   String get label => switch (this) {
-        SortField.name => 'Name',
-        SortField.date => 'Date',
-        SortField.size => 'Size',
-      };
+    SortField.name => 'Name',
+    SortField.date => 'Date',
+    SortField.size => 'Size',
+  };
 }
 
 /// Human readable byte size, e.g. 12.4 MB.
@@ -88,8 +88,18 @@ String formatDate(DateTime date) {
   if (diff == 0) return 'Today';
   if (diff == 1) return 'Yesterday';
   const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
   final base = '${date.day} ${months[date.month - 1]}';
   return date.year == now.year ? base : '$base ${date.year}';

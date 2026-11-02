@@ -40,7 +40,9 @@ class AppsController extends ChangeNotifier {
     final list = filtered.toList();
     list.sort((a, b) {
       final int result = switch (_sortField) {
-        SortField.name => a.label.toLowerCase().compareTo(b.label.toLowerCase()),
+        SortField.name => a.label.toLowerCase().compareTo(
+          b.label.toLowerCase(),
+        ),
         SortField.date => a.changedAt.compareTo(b.changedAt),
         SortField.size => a.sizeBytes.compareTo(b.sizeBytes),
       };

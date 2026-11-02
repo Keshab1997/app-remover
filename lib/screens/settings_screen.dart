@@ -50,9 +50,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.star_border),
             title: const Text('Rate this app'),
             subtitle: const Text('Give us 5 stars on Google Play'),
-            onTap: () => NativeApps.openUrl(
-              'market://details?id=$appPackageId',
-            ),
+            onTap: () =>
+                NativeApps.openUrl('market://details?id=$appPackageId'),
           ),
           ListTile(
             leading: const Icon(Icons.share_outlined),
@@ -143,10 +142,10 @@ class _SectionHeader extends StatelessWidget {
       child: Text(
         label.toUpperCase(),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.8,
-            ),
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.8,
+        ),
       ),
     );
   }

@@ -41,8 +41,9 @@ class _HomeScreenState extends State<HomeScreen>
       builder: (context, _) => Scaffold(
         appBar: _searching ? _searchAppBar() : _appBar(),
         body: _body(),
-        bottomNavigationBar:
-            _apps.selectionMode ? _selectionBar() : _memoryBar(),
+        bottomNavigationBar: _apps.selectionMode
+            ? _selectionBar()
+            : _memoryBar(),
       ),
     );
   }
@@ -52,9 +53,11 @@ class _HomeScreenState extends State<HomeScreen>
   PreferredSizeWidget _appBar() {
     final scheme = Theme.of(context).colorScheme;
     return AppBar(
-      title: Text(_apps.selectionMode
-          ? '${_apps.selected.length} selected'
-          : 'Goodbye Apps'),
+      title: Text(
+        _apps.selectionMode
+            ? '${_apps.selected.length} selected'
+            : 'Goodbye Apps',
+      ),
       leading: _apps.selectionMode
           ? IconButton(
               icon: const Icon(Icons.close),
@@ -67,9 +70,8 @@ class _HomeScreenState extends State<HomeScreen>
               IconButton(
                 icon: const Icon(Icons.select_all),
                 tooltip: 'Select all',
-                onPressed: () => _apps.selectAll(
-                  _apps.appsFor(system: _tabs.index == 1),
-                ),
+                onPressed: () =>
+                    _apps.selectAll(_apps.appsFor(system: _tabs.index == 1)),
               ),
             ]
           : [
@@ -177,10 +179,7 @@ class _HomeScreenState extends State<HomeScreen>
     }
     return TabBarView(
       controller: _tabs,
-      children: [
-        _appList(system: false),
-        _appList(system: true),
-      ],
+      children: [_appList(system: false), _appList(system: true)],
     );
   }
 
@@ -383,7 +382,9 @@ class _HomeScreenState extends State<HomeScreen>
                   color: app.isSystem ? null : scheme.error,
                 ),
                 title: Text(
-                  app.isSystem ? "System apps can't be uninstalled" : 'Uninstall',
+                  app.isSystem
+                      ? "System apps can't be uninstalled"
+                      : 'Uninstall',
                   style: app.isSystem ? null : TextStyle(color: scheme.error),
                 ),
                 onTap: app.isSystem
@@ -428,9 +429,8 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _openSettings() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
-    );
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => const SettingsScreen()));
   }
 }
 
@@ -473,15 +473,11 @@ class _EmptyState extends StatelessWidget {
                     Text(
                       subtitle!,
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                          ),
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: scheme.onSurfaceVariant),
                     ),
                   ],
-                  if (action != null) ...[
-                    const SizedBox(height: 20),
-                    action!,
-                  ],
+                  if (action != null) ...[const SizedBox(height: 20), action!],
                 ],
               ),
             ),
