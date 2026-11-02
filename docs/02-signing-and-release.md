@@ -3,6 +3,21 @@
 **Priority:** blocker (signed না হলে Play-তে upload হবে না)
 **Effort:** ১ ঘণ্টা
 
+> ✅ **এই repo-তে signing ইতিমধ্যে সেট করা আছে** (2026-11-02):
+> - Keystore: `~/keystores/goodbyeapps-upload.jks` (alias `upload`, RSA 4096)
+> - DN: `CN=Keshab Sarkar, OU=Developer, O=Keshab Studios, L=BURDWAN, ST=West Bengal, C=IN`
+> - Local: `android/key.properties` (git-ignored)
+> - GitHub Secrets: `ANDROID_KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`
+> - `android/app/build.gradle.kts`-এ `signingConfigs.release` যোগ করা আছে; key.properties
+>   না থাকলে debug-এ fallback করে।
+>
+> নিচের step ১–৩ শুধু তখন দরকার যদি keystore নতুন করে বানাতে হয় (key হারালে বা rotate করতে চাইলে)।
+> **Password repo-তে কোথাও লেখা নেই — শুধু GitHub Secrets-এ আছে।**
+>
+> ⚠️ এখন password ছোট (৬ digit)। Keystore file + password একসাথে leak হলে যে কেউ app
+> sign করতে পারবে। তাই: file-এর ২টা offline backup রাখো, password manager-এ রাখো, আর
+> Play App Signing চালু রাখো (তাহলে upload key rotate করা যায়)।
+
 ---
 
 ## 1. Upload keystore বানাও (একবারই)
