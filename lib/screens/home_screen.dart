@@ -354,6 +354,7 @@ class _HomeScreenState extends State<HomeScreen>
                 isThreeLine: true,
               ),
               const Divider(height: 1),
+              _SizeBreakdown(packageName: app.packageName),
               ListTile(
                 leading: const Icon(Icons.launch),
                 title: const Text('Open'),
@@ -434,6 +435,78 @@ class _HomeScreenState extends State<HomeScreen>
   void _openSettings() {
     Navigator.of(context)
         .push(MaterialPageRoute<void>(builder: (_) => const SettingsScreen()));
+  }
+}
+
+/// App / data / cache bytes for one package, asked for when the sheet opens.
+///
+/// `listApps` deliberately reports only the APK size (querying 200 packages
+/// costs a second), so the exact numbers are fetched for the one app the user
+/// actually tapped (docs/08). Without usage access this renders nothing.
+class _SizeBreakdown extends StatelessWidget {
+  const _SizeBreakdown({required this.packageName});
+
+  final String packageName;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return FutureBuilder<({int app, int data, int cache, int total})?>(
+      future: NativeApps.sizeBreakdown(packageName),
+      builder: (context, snapshot) {
+        final breakdown = snapshot.data;
+        if (breakdown == null) return const SizedBox.shrink();
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _SizeCell(label: 'App', bytes: breakdown.app, theme: theme),
+              _SizeCell(label: 'Data', bytes: breakdown.data, theme: theme),
+              _SizeCell(label: 'Cache', bytes: breakdown.cache, theme: theme),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _SizeCell extends StatelessWidget {
+  const _SizeCell({
+    required this.label,
+    required this.bytes,
+    required this.theme,
+  });
+
+  final String label;
+  final int bytes;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = theme.colorScheme;
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+              letterSpacing: 0.6,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            formatBytes(bytes),
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

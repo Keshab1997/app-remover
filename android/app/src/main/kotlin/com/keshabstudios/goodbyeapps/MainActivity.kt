@@ -1,6 +1,8 @@
 package com.keshabstudios.goodbyeapps
 
 import android.app.ActivityManager
+import android.app.AppOpsManager
+import android.app.usage.StorageStatsManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -15,6 +17,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.Process
+import android.os.storage.StorageManager
 import android.provider.Settings
 import android.util.LruCache
 import io.flutter.embedding.android.FlutterActivity
@@ -108,6 +112,25 @@ class MainActivity : FlutterActivity() {
                             executor.execute {
                                 val bytes = loadIcon(pkg)
                                 mainHandler.post { result.success(bytes) }
+                            }
+                        }
+                    }
+
+                    "hasUsageAccess" -> result.success(hasUsageAccess())
+
+                    "usageAccessSettings" -> result.success(
+                        startActivitySafely(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+                    )
+
+                    "getSizeBreakdown" -> {
+                        val pkg = call.argument<String>("package")
+                        if (pkg == null) {
+                            result.error("bad_args", "package is required", null)
+                        } else {
+                            // queryStatsForPackage is a disk query: off the main thread.
+                            executor.execute {
+                                val breakdown = sizeBreakdown(pkg)
+                                mainHandler.post { result.success(breakdown) }
                             }
                         }
                     }
@@ -238,6 +261,44 @@ class MainActivity : FlutterActivity() {
             scaled.compress(Bitmap.CompressFormat.PNG, 100, stream)
             stream.toByteArray()
         } catch (_: Throwable) {
+            null
+        }
+    }
+
+    /**
+     * Usage access is a special permission the user grants in Settings, never a
+     * runtime dialog — so every caller must treat null as "not available".
+     */
+    private fun hasUsageAccess(): Boolean {
+        return try {
+            val appOps = getSystemService(AppOpsManager::class.java)
+            val mode = appOps.unsafeCheckOpNoThrow(
+                AppOpsManager.OPSTR_GET_USAGE_STATS,
+                Process.myUid(),
+                packageName,
+            )
+            mode == AppOpsManager.MODE_ALLOWED
+        } catch (_: Throwable) {
+            false
+        }
+    }
+
+    /** app / data / cache bytes for [pkg], or null below API 26 or without access. */
+    private fun sizeBreakdown(pkg: String): Map<String, Long>? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return null
+        if (!hasUsageAccess()) return null
+        return try {
+            val stats = getSystemService(StorageStatsManager::class.java)
+                .queryStatsForPackage(StorageManager.UUID_DEFAULT, pkg, Process.myUserHandle())
+            mapOf(
+                "app" to stats.appBytes,
+                "data" to stats.dataBytes,
+                "cache" to stats.cacheBytes,
+                "total" to (stats.appBytes + stats.dataBytes + stats.cacheBytes),
+            )
+        } catch (_: Throwable) {
+            // Package gone between the list render and the tap: the sheet just
+            // keeps the APK size it already showed.
             null
         }
     }

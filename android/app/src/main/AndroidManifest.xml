@@ -10,6 +10,14 @@
     <!-- Lets the app open the system uninstall dialog. -->
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
 
+    <!-- Lets the app read per-package storage stats (app + data + cache) so the
+         size in the detail sheet is the truth and not just the APK. The user must
+         turn it on under Settings -> Special app access -> Usage access; without
+         it we fall back to the APK size. No data leaves the device. -->
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 

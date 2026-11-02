@@ -21,6 +21,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late final Future<({String name, int code})> _version =
       NativeApps.appVersion();
 
+  late Future<bool> _usageAccess = NativeApps.hasUsageAccess();
+
+  /// Re-read on every tap: usage access is granted on a settings screen the
+  /// app cannot observe, so this is the cheapest honest refresh.
+  Future<void> _refreshUsageAccess() async {
+    setState(() => _usageAccess = NativeApps.hasUsageAccess());
+    await _usageAccess;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -42,6 +51,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ThemeMode.dark => 'Dark',
               }),
               onTap: () => _pickTheme(mode),
+            ),
+          ),
+          const Divider(),
+          _SectionHeader('Storage'),
+          FutureBuilder<bool>(
+            future: _usageAccess,
+            builder: (context, snapshot) => ListTile(
+              leading: const Icon(Icons.straighten),
+              title: const Text('Detailed app sizes'),
+              subtitle: Text(
+                snapshot.data ?? false
+                    ? 'Usage access is on — sheets show app, data and cache'
+                    : 'Turn on usage access to see data and cache size',
+              ),
+              trailing: snapshot.data ?? false
+                  ? const Icon(Icons.check, size: 20)
+                  : const Icon(Icons.chevron_right),
+              onTap: () async {
+                if (await NativeApps.hasUsageAccess()) {
+                  await _refreshUsageAccess();
+                  return;
+                }
+                await NativeApps.openUsageAccessSettings();
+              },
             ),
           ),
           const Divider(),

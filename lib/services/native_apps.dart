@@ -67,6 +67,35 @@ class NativeApps {
     return ok ?? false;
   }
 
+  /// Whether the user granted usage access (Settings → Special app access →
+  /// Usage access). Not a runtime permission, so it can only ever be false
+  /// until the user turns it on by hand.
+  static Future<bool> hasUsageAccess() async =>
+      await _channel.invokeMethod<bool>('hasUsageAccess') ?? false;
+
+  /// Opens the usage-access page, so the user can grant what the app cannot ask
+  /// for itself. False when the device has no such screen.
+  static Future<bool> openUsageAccessSettings() async =>
+      await _channel.invokeMethod<bool>('usageAccessSettings') ?? false;
+
+  /// Exact app / data / cache bytes for [packageName] (docs/08), or null when
+  /// usage access is not granted — the caller then keeps the APK size.
+  static Future<({int app, int data, int cache, int total})?> sizeBreakdown(
+    String packageName,
+  ) async {
+    final map = await _channel.invokeMapMethod<String, dynamic>(
+      'getSizeBreakdown',
+      {'package': packageName},
+    );
+    if (map == null) return null;
+    return (
+      app: (map['app'] as num?)?.toInt() ?? 0,
+      data: (map['data'] as num?)?.toInt() ?? 0,
+      cache: (map['cache'] as num?)?.toInt() ?? 0,
+      total: (map['total'] as num?)?.toInt() ?? 0,
+    );
+  }
+
   /// Returns (available, total) bytes of RAM.
   static Future<({int available, int total})> freeMemory() async {
     final map = await _channel.invokeMapMethod<String, dynamic>('freeMemory');
