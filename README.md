@@ -27,6 +27,25 @@ implemented in Kotlin and exposed over a `MethodChannel`.
 
 System apps cannot be uninstalled by the OS; the UI disables the action and explains why.
 
+## Build docs / roadmap
+
+যা যা বাকি আছে আর কীভাবে বানাবে — সব `docs/` folder-এ:
+
+| Doc | কী |
+|---|---|
+| [docs/README.md](docs/README.md) | index, priority, effort estimate |
+| [01 icon & brand](docs/01-icon-and-brand.md) | adaptive icon, Play graphics, screenshot plan |
+| [02 signing & release](docs/02-signing-and-release.md) | keystore, `key.properties`, `.aab`, versioning |
+| [03 Play Console](docs/03-play-console.md) | listing copy, data safety, permission declaration |
+| [04 privacy policy](docs/04-privacy-policy.md) | host করার-ready policy (EN + BN) |
+| [05 testing](docs/05-testing-checklist.md) | device matrix + edge cases |
+| [06 status bar notification](docs/06-status-bar-notification.md) | original-এর notification feature |
+| [07 icon lazy-loading](docs/07-icon-lazy-loading.md) | ২০০+ app-এ list fast |
+| [08 accurate size](docs/08-accurate-app-size.md) | data + cache size |
+| [09 home shortcut](docs/09-home-screen-shortcut.md) | pinned shortcut |
+| [10 Bangla](docs/10-bangla-localization.md) | bn localization |
+| [11 ads & IAP](docs/11-ads-and-iap.md) | AdMob + Remove Ads |
+
 ## Project layout
 
 ```
