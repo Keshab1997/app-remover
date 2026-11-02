@@ -34,6 +34,10 @@ import java.util.concurrent.Executors
 
 class MainActivity : FlutterActivity() {
 
+    private companion object {
+        const val REQUEST_NOTIFICATIONS = 401
+    }
+
     private val methodChannelName = "goodbye_apps/native"
     private val eventChannelName = "goodbye_apps/events"
     private val executor = Executors.newSingleThreadExecutor()
@@ -48,6 +52,9 @@ class MainActivity : FlutterActivity() {
         // sizeOf is measured in the same unit as the budget above: bytes.
         override fun sizeOf(key: String, value: ByteArray): Int = value.size
     }
+
+    /** The channel result waiting on the POST_NOTIFICATIONS dialog. */
+    private var pendingNotificationResult: MethodChannel.Result? = null
 
     private var eventSink: EventChannel.EventSink? = null
     private var receiver: BroadcastReceiver? = null
@@ -130,6 +137,37 @@ class MainActivity : FlutterActivity() {
                             }
                         }
                     }
+
+                    "setStatusBarNotification" -> {
+                        val enabled = call.argument<Boolean>("enabled") ?: false
+                        if (!enabled) {
+                            NotificationHelper.hide(this)
+                            result.success(true)
+                        } else if (needsNotificationPermission()) {
+                            // The user answers a system dialog first; the result
+                            // is completed in onRequestPermissionsResult.
+                            pendingNotificationResult = result
+                            requestPermissions(
+                                arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                                REQUEST_NOTIFICATIONS
+                            )
+                        } else {
+                            val memory = freeMemory()
+                            NotificationHelper.show(
+                                this,
+                                memory["available"] ?: 0L,
+                                memory["total"] ?: 0L,
+                            )
+                            result.success(true)
+                        }
+                    }
+
+                    "notificationSettings" -> result.success(
+                        startActivitySafely(
+                            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                        )
+                    )
 
                     "hasUsageAccess" -> result.success(hasUsageAccess())
 
@@ -438,10 +476,38 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+    private fun needsNotificationPermission(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return false
+        return checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode != REQUEST_NOTIFICATIONS) return
+        val granted = grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED
+        if (granted) {
+            val memory = freeMemory()
+            NotificationHelper.show(this, memory["available"] ?: 0L, memory["total"] ?: 0L)
+        }
+        // The Dart side only needs to know whether to show its settings dialog.
+        pendingNotificationResult?.success(granted)
+        pendingNotificationResult = null
+    }
+
     private fun freeMemory(): Map<String, Long> {
         val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val info = ActivityManager.MemoryInfo()
         am.getMemoryInfo(info)
+        // The home screen refresh is the only clock this notification has: keep
+        // the tray in step with it when the user switched it on (docs/06).
+        if (NotificationHelper.isWanted(this)) {
+            NotificationHelper.show(this, info.availMem, info.totalMem)
+        }
         return mapOf(
             "available" to info.availMem,
             "total" to info.totalMem,

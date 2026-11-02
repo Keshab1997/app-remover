@@ -54,6 +54,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           const Divider(),
+          _SectionHeader('Status bar'),
+          ValueListenableBuilder<bool>(
+            valueListenable: AppSettings.statusBar,
+            builder: (context, enabled, _) => SwitchListTile(
+              secondary: const Icon(Icons.notifications_active_outlined),
+              title: const Text('Status bar notification'),
+              subtitle: Text(
+                enabled
+                    ? 'Free memory in the tray, refreshed with the list'
+                    : 'Show free memory in the tray',
+              ),
+              value: enabled,
+              onChanged: _setStatus,
+            ),
+          ),
+          const Divider(),
           _SectionHeader('Storage'),
           FutureBuilder<bool>(
             future: _usageAccess,
@@ -131,6 +147,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  /// Turns the tray notification on or off, and explains itself when Android
+  /// says no — the permission dialog can be answered once and forever.
+  Future<void> _setStatus(bool enabled) async {
+    final granted = await NativeApps.setStatusBarNotification(enabled);
+    if (!mounted) return;
+    if (!granted) {
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Notifications are off'),
+          content: const Text(
+            'Allow notifications for Goodbye Apps in system settings, then '
+            'turn this back on.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                // openUrl only takes http/https; this page is an intent.
+                NativeApps.openNotificationSettings();
+              },
+              child: const Text('Open settings'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+    await AppSettings.setStatusBar(enabled);
   }
 
   Future<void> _pickTheme(ThemeMode current) async {

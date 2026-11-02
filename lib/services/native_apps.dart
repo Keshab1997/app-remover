@@ -38,6 +38,22 @@ class NativeApps {
     return ok ?? false;
   }
 
+  /// Shows or hides the ongoing free-memory notification (docs/06). True means
+  /// the user can see it; false means they still have to allow notifications.
+  static Future<bool> setStatusBarNotification(bool enabled) async {
+    final ok = await _channel.invokeMethod<bool>('setStatusBarNotification', {
+      'enabled': enabled,
+    });
+    return ok ?? false;
+  }
+
+  /// This app's notification page in system settings. There is no way back, so
+  /// the caller pairs it with text that explains what to toggle.
+  static Future<bool> openNotificationSettings() async {
+    final ok = await _channel.invokeMethod<bool>('notificationSettings');
+    return ok ?? false;
+  }
+
   static Future<bool> uninstall(String packageName) async {
     final ok = await _channel.invokeMethod<bool>('uninstall', {
       'package': packageName,

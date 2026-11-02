@@ -1,0 +1,11 @@
+<!-- Status bar icon (docs/06). The system tints notification icons, so this
+     must stay a flat white shape on a transparent canvas. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M17,7h-4V4h-2v3H7a2,2 0 0 0 -2,2v11a2,2 0 0 0 2,2h10a2,2 0 0 0 2,-2V9a2,2 0 0 0 -2,-2zM9,17H7v-2h2v2zM9,13H7v-2h2v2zM13,17h-2v-2h2v2zM13,13h-2v-2h2v2zM17,17h-2v-2h2v2zM17,13h-2v-2h2v2z" />
+</vector>
