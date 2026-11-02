@@ -57,7 +57,7 @@ spec আছে। প্রতিটা doc-এ **কী বানাতে হ�
 
 ## এখনো যা বাকি (তোমার হাত লাগবে)
 
-- [ ] App icon (এখনো Flutter default) — doc 01
+- [x] App icon — doc 01: `tool/make_icons.py` থেকে adaptive/legacy/Play/feature graphic (brand `#3D5AFE`, flat glyph)
 - [ ] Privacy policy **hosting** + `privacyPolicyUrl` update — file ready, URL বাকি
 - [ ] `.aab` build verify — Actions → *Build Android APK or AAB (Manual)*
 - [ ] Play Console upload — doc 03 (Console-এর ভেতরে ঢুকতে হয়)

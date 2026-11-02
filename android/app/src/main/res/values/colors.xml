@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- docs/01 brand table; keep in step with the seed in lib/main.dart. -->
+    <color name="ic_launcher_background">#3D5AFE</color>
+</resources>
