@@ -380,6 +380,28 @@ class _HomeScreenState extends State<HomeScreen>
                 },
               ),
               ListTile(
+                leading: const Icon(Icons.add_to_home_screen_outlined),
+                title: const Text('Add to home screen'),
+                onTap: () async {
+                  Navigator.pop(sheetContext);
+                  final ok = await NativeApps.addShortcut(app.packageName);
+                  // `context` is the State's own, so the State's mounted flag
+                  // is the guard the analyzer (and reality) wants.
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      // false covers both "launcher cannot pin" and "this app
+                      // has no launch intent", which the user cannot act on.
+                      content: Text(
+                        ok
+                            ? 'Confirm the shortcut on the home screen'
+                            : "This app or launcher can't be pinned",
+                      ),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
                 enabled: !app.isSystem,
                 leading: Icon(
                   Icons.delete_outline,

@@ -68,6 +68,12 @@ kotlin {
     }
 }
 
+dependencies {
+    // ShortcutManagerCompat / IconCompat for "Add to home screen" (docs/09),
+    // and NotificationCompat for the storage readout (docs/06).
+    implementation("androidx.core:core-ktx:1.13.1")
+}
+
 flutter {
     source = "../.."
 }

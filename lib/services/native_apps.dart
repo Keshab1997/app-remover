@@ -29,6 +29,15 @@ class NativeApps {
     return (bytes == null || bytes.isEmpty) ? null : bytes;
   }
 
+  /// Asks the launcher to pin [packageName] to the home screen. True means the
+  /// request was sent — the user still confirms it, and may cancel.
+  static Future<bool> addShortcut(String packageName) async {
+    final ok = await _channel.invokeMethod<bool>('addShortcut', {
+      'package': packageName,
+    });
+    return ok ?? false;
+  }
+
   static Future<bool> uninstall(String packageName) async {
     final ok = await _channel.invokeMethod<bool>('uninstall', {
       'package': packageName,

@@ -21,6 +21,9 @@ import android.os.Process
 import android.os.storage.StorageManager
 import android.provider.Settings
 import android.util.LruCache
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
@@ -112,6 +115,18 @@ class MainActivity : FlutterActivity() {
                             executor.execute {
                                 val bytes = loadIcon(pkg)
                                 mainHandler.post { result.success(bytes) }
+                            }
+                        }
+                    }
+
+                    "addShortcut" -> {
+                        val pkg = call.argument<String>("package")
+                        if (pkg == null) {
+                            result.error("bad_args", "package is required", null)
+                        } else {
+                            executor.execute {
+                                val ok = addShortcut(pkg)
+                                mainHandler.post { result.success(ok) }
                             }
                         }
                     }
@@ -299,6 +314,73 @@ class MainActivity : FlutterActivity() {
         } catch (_: Throwable) {
             // Package gone between the list render and the tap: the sheet just
             // keeps the APK size it already showed.
+            null
+        }
+    }
+
+    // -------------------------------------------------------------- shortcuts
+
+    /**
+     * Asks the launcher to pin [pkg]. True only means the request left the app:
+     * the user still confirms in a system dialog and may cancel it.
+     */
+    private fun addShortcut(pkg: String): Boolean {
+        val launchIntent = packageManager.getLaunchIntentForPackage(pkg) ?: return false
+        val label = try {
+            packageManager.getApplicationLabel(
+                packageManager.getApplicationInfo(pkg, 0)
+            ).toString()
+        } catch (_: Throwable) {
+            pkg
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+            ShortcutManagerCompat.isRequestPinShortcutSupported(this)
+        ) {
+            val icon = appBitmap(pkg)?.let { IconCompat.createWithAdaptiveBitmap(it) }
+                ?: IconCompat.createWithResource(this, R.mipmap.ic_launcher)
+            val shortcut = ShortcutInfoCompat.Builder(this, "app_$pkg")
+                // Launchers clip the short label around ten characters.
+                .setShortLabel(label.take(10))
+                .setLongLabel(label)
+                .setIcon(icon)
+                .setIntent(launchIntent.apply { action = Intent.ACTION_MAIN })
+                .build()
+            return ShortcutManagerCompat.requestPinShortcut(this, shortcut, null)
+        }
+
+        // Legacy launchers (API < 26) take a broadcast instead.
+        return try {
+            @Suppress("DEPRECATION")
+            val shortcutIntent = Intent("com.android.launcher.action.INSTALL_SHORTCUT").apply {
+                putExtra(Intent.EXTRA_SHORTCUT_INTENT, launchIntent)
+                putExtra(Intent.EXTRA_SHORTCUT_NAME, label)
+                putExtra("duplicate", false)
+                appBitmap(pkg)?.let { putExtra(Intent.EXTRA_SHORTCUT_ICON, it) }
+            }
+            sendBroadcast(shortcutIntent)
+            true
+        } catch (_: Throwable) {
+            false
+        }
+    }
+
+    /** The icon as a bitmap, which is what a pinned shortcut wants (108dp). */
+    private fun appBitmap(pkg: String): Bitmap? {
+        return try {
+            val drawable = packageManager.getApplicationIcon(pkg)
+            if (drawable is BitmapDrawable && drawable.bitmap != null) {
+                drawable.bitmap
+            } else {
+                val w = drawable.intrinsicWidth.takeIf { it > 0 } ?: 108
+                val h = drawable.intrinsicHeight.takeIf { it > 0 } ?: 108
+                Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888).also { bmp ->
+                    val canvas = Canvas(bmp)
+                    drawable.setBounds(0, 0, canvas.width, canvas.height)
+                    drawable.draw(canvas)
+                }
+            }
+        } catch (_: Throwable) {
             null
         }
     }
