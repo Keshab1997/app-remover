@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 import '../models/app_info.dart';
+import '../services/icon_store.dart';
 
 class AppTile extends StatelessWidget {
   const AppTile({
@@ -34,7 +35,7 @@ class AppTile extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
           child: Row(
             children: [
-              AppIcon(icon: app.icon, scheme: scheme),
+              LazyAppIcon(packageName: app.packageName, scheme: scheme),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -90,6 +91,62 @@ class AppTile extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// One row's icon: asks [IconStore] on first build and repaints itself when
+/// the bytes land. Deliberately its own widget, so an icon arriving repaints
+/// 48 px instead of the whole list.
+
+class LazyAppIcon extends StatefulWidget {
+  const LazyAppIcon({
+    super.key,
+    required this.packageName,
+    required this.scheme,
+    this.store,
+  });
+
+  final String packageName;
+  final ColorScheme scheme;
+
+  /// Overridable so a test can hand one tile an isolated cache.
+  final IconStore? store;
+
+  @override
+  State<LazyAppIcon> createState() => _LazyAppIconState();
+}
+
+class _LazyAppIconState extends State<LazyAppIcon> {
+  IconStore get _store => widget.store ?? IconStore.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _store.addListener(_onIconsChanged);
+    _store.request(widget.packageName);
+  }
+
+  @override
+  void didUpdateWidget(LazyAppIcon oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.packageName == widget.packageName) return;
+    _store.request(widget.packageName);
+    setState(() {});
+  }
+
+  void _onIconsChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _store.removeListener(_onIconsChanged);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppIcon(icon: _store[widget.packageName], scheme: widget.scheme);
   }
 }
 

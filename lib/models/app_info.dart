@@ -1,6 +1,7 @@
-import 'dart:typed_data';
-
 /// A single installed application as reported by the Android package manager.
+///
+/// Icons are not part of this record — they are fetched per visible row by
+/// `IconStore` (docs/07), so a 200-app list does not decode 200 PNGs first.
 class AppInfo {
   const AppInfo({
     required this.packageName,
@@ -11,7 +12,6 @@ class AppInfo {
     required this.lastUpdateTime,
     required this.versionName,
     required this.versionCode,
-    this.icon,
   });
 
   final String packageName;
@@ -22,7 +22,6 @@ class AppInfo {
   final int lastUpdateTime;
   final String versionName;
   final int versionCode;
-  final Uint8List? icon;
 
   DateTime get installedAt =>
       DateTime.fromMillisecondsSinceEpoch(firstInstallTime);
@@ -44,7 +43,6 @@ class AppInfo {
       lastUpdateTime: (map['lastUpdateTime'] as num?)?.toInt() ?? 0,
       versionName: map['versionName'] as String? ?? '',
       versionCode: (map['versionCode'] as num?)?.toInt() ?? 0,
-      icon: map['icon'] as Uint8List?,
     );
   }
 

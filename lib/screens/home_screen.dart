@@ -342,7 +342,10 @@ class _HomeScreenState extends State<HomeScreen>
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: AppIcon(icon: app.icon, scheme: scheme),
+                leading: LazyAppIcon(
+                  packageName: app.packageName,
+                  scheme: scheme,
+                ),
                 title: Text(app.label),
                 subtitle: Text(
                   '${app.packageName}\n'

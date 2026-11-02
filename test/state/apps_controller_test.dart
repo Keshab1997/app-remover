@@ -50,6 +50,14 @@ final List<Map<String, dynamic>> _deviceRows = [
     // No package name: dropped by the service before the controller sees it.
     'label': 'Ghost',
   },
+  {
+    // Icons are not part of the row any more (docs/07).
+    'packageName': 'com.example.iconless',
+    'label': 'Iconless',
+    'isSystem': false,
+    'sizeBytes': 1,
+    'icon': 'leftover from an older build',
+  },
 ];
 
 void main() {
@@ -85,7 +93,7 @@ void main() {
 
     expect(controller.loading, isFalse);
     expect(controller.error, isNull);
-    expect(controller.installedCount, 4);
+    expect(controller.installedCount, 5);
     expect(controller.appsFor(system: true).map((a) => a.packageName), [
       'android.systemui',
     ]);
@@ -113,12 +121,14 @@ void main() {
     expect(controller.appsFor(system: false).map((a) => a.label), [
       'Camera',
       'Games',
+      'Iconless',
       'Maps',
     ]);
 
     controller.toggleSortOrder();
     expect(controller.appsFor(system: false).map((a) => a.label), [
       'Maps',
+      'Iconless',
       'Games',
       'Camera',
     ]);
@@ -129,6 +139,7 @@ void main() {
     controller.setSort(SortField.date);
 
     expect(controller.appsFor(system: false).map((a) => a.packageName), [
+      'com.example.iconless', // no timestamps at all -> epoch
       'com.example.games', // both stamps 1000
       'com.example.camera', // installed 8000, updated 2000
       'com.example.maps', // updated 9000
@@ -140,6 +151,7 @@ void main() {
     controller.setSort(SortField.size);
 
     expect(controller.appsFor(system: false).map((a) => a.sizeBytes), [
+      1,
       100,
       200,
       300,
@@ -154,7 +166,7 @@ void main() {
     expect(controller.appsFor(system: true), isEmpty);
 
     controller.setQuery('');
-    expect(controller.appsFor(system: false).length, 3);
+    expect(controller.appsFor(system: false).length, 4);
   });
 
   test('selection tracks the batch size', () async {
@@ -169,7 +181,7 @@ void main() {
     expect(controller.selectedSize, 300);
 
     controller.selectAll(controller.appsFor(system: false));
-    expect(controller.selected.length, 3);
+    expect(controller.selected.length, 4);
 
     controller.clearSelection();
     expect(controller.selectionMode, isFalse);
@@ -190,6 +202,6 @@ void main() {
     await controller.load();
 
     expect(controller.selected, ['com.example.maps']);
-    expect(controller.installedCount, 3);
+    expect(controller.installedCount, 4);
   });
 }

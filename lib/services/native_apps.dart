@@ -18,6 +18,17 @@ class NativeApps {
     return apps;
   }
 
+  /// Icon of one package, PNG bytes at 144px, or null when it has none.
+  ///
+  /// Fetched per row instead of inside `listApps`: decoding 200 icons up
+  /// front is what made the first frame take seconds (docs/07).
+  static Future<Uint8List?> getIcon(String packageName) async {
+    final bytes = await _channel.invokeMethod<Uint8List>('getIcon', {
+      'package': packageName,
+    });
+    return (bytes == null || bytes.isEmpty) ? null : bytes;
+  }
+
   static Future<bool> uninstall(String packageName) async {
     final ok = await _channel.invokeMethod<bool>('uninstall', {
       'package': packageName,

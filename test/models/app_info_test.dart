@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:goodbye_apps/models/app_info.dart';
 
@@ -26,7 +24,6 @@ AppInfo _app({
 void main() {
   group('AppInfo.fromMap', () {
     test('reads every field the Kotlin side sends', () {
-      final icon = Uint8List.fromList([1, 2, 3]);
       final app = AppInfo.fromMap({
         'packageName': 'com.example.app',
         'label': 'Example',
@@ -36,7 +33,6 @@ void main() {
         'lastUpdateTime': 2000,
         'versionName': '2.1',
         'versionCode': 21,
-        'icon': icon,
       });
 
       expect(app.packageName, 'com.example.app');
@@ -45,7 +41,6 @@ void main() {
       expect(app.sizeBytes, 2048);
       expect(app.versionName, '2.1');
       expect(app.versionCode, 21);
-      expect(app.icon, icon);
     });
 
     test('falls back to safe defaults for absent keys', () {
@@ -57,8 +52,15 @@ void main() {
       expect(app.isSystem, isFalse);
       expect(app.sizeBytes, 0);
       expect(app.versionCode, 0);
-      expect(app.icon, isNull);
     });
+  });
+
+  test('the list row no longer carries icon bytes', () {
+    // docs/07 moved icons out of listApps; a stray key must not resurrect it.
+    expect(
+      AppInfo.fromMap({'packageName': 'a', 'icon': 'bytes'}).packageName,
+      'a',
+    );
   });
 
   group('changedAt', () {

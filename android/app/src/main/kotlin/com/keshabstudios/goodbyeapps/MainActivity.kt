@@ -16,6 +16,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.util.LruCache
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
@@ -30,6 +31,16 @@ class MainActivity : FlutterActivity() {
     private val eventChannelName = "goodbye_apps/events"
     private val executor = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler(Looper.getMainLooper())
+
+    /**
+     * Icon bytes by package, weighted by size. `listApps` no longer ships
+     * icons (docs/07): 200 PNG encodes plus a 1.5 MB transfer was what made
+     * the first frame slow, so rows ask for their own icon on demand.
+     */
+    private val iconCache = object : LruCache<String, ByteArray>(8 * 1024 * 1024) {
+        // sizeOf is measured in the same unit as the budget above: bytes.
+        override fun sizeOf(key: String, value: ByteArray): Int = value.size
+    }
 
     private var eventSink: EventChannel.EventSink? = null
     private var receiver: BroadcastReceiver? = null
@@ -86,6 +97,19 @@ class MainActivity : FlutterActivity() {
                         val url = call.argument<String>("url")
                         val intent = if (url != null) Intent(Intent.ACTION_VIEW, Uri.parse(url)) else null
                         result.success(intent != null && startActivitySafely(intent))
+                    }
+
+                    "getIcon" -> {
+                        val pkg = call.argument<String>("package")
+                        if (pkg == null) {
+                            result.error("bad_args", "package is required", null)
+                        } else {
+                            // getApplicationIcon touches disk: keep it off the main thread.
+                            executor.execute {
+                                val bytes = loadIcon(pkg)
+                                mainHandler.post { result.success(bytes) }
+                            }
+                        }
                     }
 
                     "freeMemory" -> result.success(freeMemory())
@@ -154,8 +178,7 @@ class MainActivity : FlutterActivity() {
                 "firstInstallTime" to (pkgInfo?.firstInstallTime ?: 0L),
                 "lastUpdateTime" to (pkgInfo?.lastUpdateTime ?: 0L),
                 "versionName" to (pkgInfo?.versionName ?: ""),
-                "versionCode" to (if (pkgInfo != null) packageInfoVersionCode(pkgInfo) else 0L),
-                "icon" to drawableToPng(pm.getApplicationIcon(ai))
+                "versionCode" to (if (pkgInfo != null) packageInfoVersionCode(pkgInfo) else 0L)
             ))
         }
         return out
@@ -178,6 +201,19 @@ class MainActivity : FlutterActivity() {
         } catch (_: Throwable) {
         }
         return total
+    }
+
+    private fun loadIcon(pkg: String): ByteArray? {
+        iconCache.get(pkg)?.let { return it }
+        val bytes = try {
+            drawableToPng(packageManager.getApplicationIcon(pkg))
+        } catch (_: Throwable) {
+            null
+        }
+        // Cache "no icon" as an empty array, so a row that cannot be drawn
+        // does not retry on every scroll.
+        iconCache.put(pkg, bytes ?: ByteArray(0))
+        return bytes
     }
 
     private fun drawableToPng(drawable: Drawable): ByteArray? {
@@ -282,6 +318,7 @@ class MainActivity : FlutterActivity() {
         }
         val r = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
+                intent?.data?.schemeSpecificPart?.let { iconCache.remove(it) }
                 eventSink?.success(intent?.action)
             }
         }
