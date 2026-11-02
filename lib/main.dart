@@ -18,7 +18,7 @@ class AppRemoverApp extends StatelessWidget {
       valueListenable: AppSettings.themeMode,
       builder: (context, mode, _) {
         return MaterialApp(
-          title: 'App Remover',
+          title: 'Goodbye Apps',
           debugShowCheckedModeBanner: false,
           themeMode: mode,
           theme: _buildTheme(Brightness.light),

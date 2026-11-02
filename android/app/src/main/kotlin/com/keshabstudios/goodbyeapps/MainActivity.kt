@@ -1,4 +1,4 @@
-package com.cleanapps.app_remover
+package com.keshabstudios.goodbyeapps
 
 import android.app.ActivityManager
 import android.content.BroadcastReceiver
@@ -26,8 +26,8 @@ import java.util.concurrent.Executors
 
 class MainActivity : FlutterActivity() {
 
-    private val methodChannelName = "app_remover/native"
-    private val eventChannelName = "app_remover/events"
+    private val methodChannelName = "goodbye_apps/native"
+    private val eventChannelName = "goodbye_apps/events"
     private val executor = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler(Looper.getMainLooper())
 

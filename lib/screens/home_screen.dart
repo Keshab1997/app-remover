@@ -54,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen>
     return AppBar(
       title: Text(_apps.selectionMode
           ? '${_apps.selected.length} selected'
-          : 'App Remover'),
+          : 'Goodbye Apps'),
       leading: _apps.selectionMode
           ? IconButton(
               icon: const Icon(Icons.close),

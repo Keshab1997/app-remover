@@ -6,8 +6,8 @@ import '../models/app_info.dart';
 class NativeApps {
   NativeApps._();
 
-  static const MethodChannel _channel = MethodChannel('app_remover/native');
-  static const EventChannel _events = EventChannel('app_remover/events');
+  static const MethodChannel _channel = MethodChannel('goodbye_apps/native');
+  static const EventChannel _events = EventChannel('goodbye_apps/events');
 
   static Future<List<AppInfo>> listApps() async {
     final result = await _channel.invokeMethod<List<dynamic>>('listApps');

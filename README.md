@@ -1,9 +1,11 @@
-# App Remover (Flutter)
+# Goodbye Apps – Uninstaller (Flutter)
 
 একটা Flutter + Kotlin Android app, যেটা device-এ install করা apps দেখায়, sort/search করে,
 আর system uninstall dialog দিয়ে app remove করে। Reference app-টা native Android (Kotlin +
 Java) ছিল — এই project-টা পুরো নতুন code দিয়ে Flutter-এ লেখা। Reference app-এর কোনো code,
 graphics, icon বা text কপি করা হয়নি।
+
+Play identity (fixed): **`com.keshabstudios.goodbyeapps`** · title: **Goodbye Apps – Uninstaller**
 
 A Flutter reimplementation of a typical "uninstaller" app. The UI is Flutter; the parts
 that Android only exposes natively (package list, icons, uninstall intents, RAM info) are
@@ -37,10 +39,10 @@ lib/
   screens/home_screen.dart   Tabs, app list, search, sort sheet, action sheet
   screens/settings_screen.dart
   widgets/app_tile.dart      List row + icon loader
-android/app/src/main/kotlin/com/cleanapps/app_remover/MainActivity.kt
+android/app/src/main/kotlin/com/keshabstudios/goodbyeapps/MainActivity.kt
 ```
 
-### Native bridge (`app_remover/native`)
+### Native bridge (`goodbye_apps/native`)
 
 | Method | Returns | Notes |
 | --- | --- | --- |
@@ -54,7 +56,7 @@ android/app/src/main/kotlin/com/cleanapps/app_remover/MainActivity.kt
 | `freeMemory` | `{available,total,lowMemory}` | `ActivityManager.MemoryInfo` |
 | `appVersion` | `{versionName,versionCode}` | |
 
-`app_remover/events` (`EventChannel`) emits `PACKAGE_ADDED`, `PACKAGE_REMOVED`,
+`goodbye_apps/events` (`EventChannel`) emits `PACKAGE_ADDED`, `PACKAGE_REMOVED`,
 `PACKAGE_REPLACED`.
 
 ## Build
@@ -71,16 +73,17 @@ Output: `build/app/outputs/flutter-apk/app-release.apk`
 
 ## Before publishing on Google Play
 
-1. **Change the application id.** The placeholder is `com.cleanapps.app_remover`.
-   Update `android/app/build.gradle.kts` → `applicationId` (and `namespace` if you want),
-   plus `appPackageId` in `lib/screens/settings_screen.dart`.
-2. **App name, icon and copy.** Replace `android:label` and the launcher icon with your own.
-   Do not reuse another publisher's name, icon, screenshots or description.
+1. **Application id** is already set to `com.keshabstudios.goodbyeapps` in
+   `android/app/build.gradle.kts` and `namespace`/Kotlin package match it. Do not change it
+   after the first upload — Play treats it as permanent.
+2. **App icon and copy.** Replace the launcher icon with your own and keep
+   `android:label="Goodbye Apps – Uninstaller"` in sync with the Play listing title.
 3. **`QUERY_ALL_PACKAGES` declaration.** Play Console asks for a declaration for this
    permission. An app whose core purpose is installing/uninstalling/managing apps is an
    allowed use case — describe exactly that in the declaration.
-4. **Privacy policy.** Set `privacyPolicyUrl` in `lib/screens/settings_screen.dart` to a real,
-   hosted page. Play requires a policy for apps that request sensitive permissions, and the
+4. **Privacy policy.** `privacyPolicyUrl` and `supportEmail` live in
+   `lib/screens/settings_screen.dart`; point them at hosted pages on `goodbyeapps.com`.
+   Play requires a policy for apps that request sensitive permissions, and the
    Data safety form must match what the app actually does.
 5. **Signing.** Release builds currently use the debug key. Create an upload keystore and
    configure `signingConfigs` before uploading.

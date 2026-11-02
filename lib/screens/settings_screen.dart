@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import '../services/native_apps.dart';
 import '../services/settings.dart';
 
-const String appPackageId = 'com.cleanapps.app_remover';
+const String appPackageId = 'com.keshabstudios.goodbyeapps';
 
-// TODO: replace with your own hosted privacy policy before publishing.
-const String privacyPolicyUrl = 'https://example.com/privacy-policy';
+// TODO: host these on goodbyeapps.com before publishing (or point them at an
+// existing privacy policy / support inbox).
+const String privacyPolicyUrl = 'https://goodbyeapps.com/privacy-policy';
+const String supportEmail = 'hello@goodbyeapps.com';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -56,7 +58,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.share_outlined),
             title: const Text('Share app'),
             onTap: () => NativeApps.share(
-              'Check out App Remover – a simple way to uninstall apps.\n'
+              'Check out Goodbye Apps – a simple way to uninstall apps.\n'
               'https://play.google.com/store/apps/details?id=$appPackageId',
             ),
           ),
@@ -64,7 +66,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.mail_outline),
             title: const Text('Send feedback'),
             onTap: () => NativeApps.openUrl(
-              'mailto:hello@example.com?subject=App%20Remover%20feedback',
+              'mailto:$supportEmail?subject=Goodbye%20Apps%20feedback',
             ),
           ),
           ListTile(
@@ -87,7 +89,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 24),
           Center(
             child: Text(
-              'App Remover',
+              'Goodbye Apps',
               style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

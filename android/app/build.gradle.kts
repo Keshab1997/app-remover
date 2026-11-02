@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.cleanapps.app_remover"
+    namespace = "com.keshabstudios.goodbyeapps"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -15,8 +15,8 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.cleanapps.app_remover"
+        // Permanent Play Store identity. Cannot change after the first upload.
+        applicationId = "com.keshabstudios.goodbyeapps"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

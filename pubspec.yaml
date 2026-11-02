@@ -1,5 +1,5 @@
-name: app_remover
-description: "A Flutter Android app for browsing, inspecting and uninstalling installed apps."
+name: goodbye_apps
+description: "Goodbye Apps – a Flutter Android app for browsing, inspecting and uninstalling installed apps."
 publish_to: 'none'
 version: 1.0.0+1
 
