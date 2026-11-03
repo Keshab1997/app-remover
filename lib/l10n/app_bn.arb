@@ -69,5 +69,8 @@
   "sendFeedback": "মতামত পাঠান",
   "privacyPolicy": "প্রাইভেসি পলিসি",
   "version": "ভার্সন",
-  "clearSearch": "সার্চ মুছুন"
+  "clearSearch": "সার্চ মুছুন",
+  "sizesHintTitle": "সঠিক সাইজের জন্য usage access লাগে",
+  "enable": "চালু করুন",
+  "noThanks": "লাগবে না"
 }

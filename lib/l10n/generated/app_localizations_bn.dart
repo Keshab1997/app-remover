@@ -239,4 +239,13 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get clearSearch => 'সার্চ মুছুন';
+
+  @override
+  String get sizesHintTitle => 'সঠিক সাইজের জন্য usage access লাগে';
+
+  @override
+  String get enable => 'চালু করুন';
+
+  @override
+  String get noThanks => 'লাগবে না';
 }

@@ -238,4 +238,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clearSearch => 'Clear search';
+
+  @override
+  String get sizesHintTitle => 'Exact sizes need usage access';
+
+  @override
+  String get enable => 'Enable';
+
+  @override
+  String get noThanks => 'No thanks';
 }

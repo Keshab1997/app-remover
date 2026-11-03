@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../l10n/generated/app_localizations.dart';
 import '../models/app_info.dart';
 import '../services/native_apps.dart';
+import '../services/settings.dart';
 import '../state/apps_controller.dart';
 import '../widgets/app_tile.dart';
 import 'settings_screen.dart';
@@ -501,47 +503,117 @@ class _HomeScreenState extends State<HomeScreen>
 ///
 /// `listApps` deliberately reports only the APK size (querying 200 packages
 /// costs a second), so the exact numbers are fetched for the one app the user
-/// actually tapped (docs/08). Without usage access this renders nothing.
-class _SizeBreakdown extends StatelessWidget {
+/// actually tapped (docs/08).
+class _SizeBreakdown extends StatefulWidget {
   const _SizeBreakdown({required this.packageName});
 
   final String packageName;
 
   @override
+  State<_SizeBreakdown> createState() => _SizeBreakdownState();
+}
+
+class _SizeBreakdownState extends State<_SizeBreakdown> {
+  late final Future<_Sizes> _sizes = _load();
+
+  Future<_Sizes> _load() async {
+    // No storage stats live behind a browser, and the channel is not there to
+    // ask; say nothing rather than invite the user to a settings page that
+    // does not exist.
+    if (kIsWeb) return const _Sizes();
+    final breakdown = await NativeApps.sizeBreakdown(widget.packageName);
+    if (breakdown != null) return _Sizes(breakdown: breakdown);
+    // A granted-but-failed query (package gone mid-tap) is transient, so it
+    // must not nag about a permission the user already gave.
+    if (await NativeApps.hasUsageAccess()) return const _Sizes();
+    return const _Sizes(needsAccess: true);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
-    return FutureBuilder<({int app, int data, int cache, int total})?>(
-      future: NativeApps.sizeBreakdown(packageName),
+    return FutureBuilder<_Sizes>(
+      future: _sizes,
       builder: (context, snapshot) {
-        final breakdown = snapshot.data;
-        if (breakdown == null) return const SizedBox.shrink();
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _SizeCell(
-                label: l10n.sizeApp,
-                bytes: breakdown.app,
-                theme: theme,
+        final sizes = snapshot.data;
+        if (sizes == null) return const SizedBox(height: 6);
+        final breakdown = sizes.breakdown;
+        if (breakdown != null) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _SizeCell(
+                  label: l10n.sizeApp,
+                  bytes: breakdown.app,
+                  theme: theme,
+                ),
+                _SizeCell(
+                  label: l10n.sizeData,
+                  bytes: breakdown.data,
+                  theme: theme,
+                ),
+                _SizeCell(
+                  label: l10n.sizeCache,
+                  bytes: breakdown.cache,
+                  theme: theme,
+                ),
+              ],
+            ),
+          );
+        }
+        if (!sizes.needsAccess) return const SizedBox.shrink();
+        return ValueListenableBuilder<bool>(
+          valueListenable: AppSettings.sizesHint,
+          builder: (context, showHint, _) {
+            if (!showHint) return const SizedBox.shrink();
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 8, 8),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      l10n.sizesHintTitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: NativeApps.openUsageAccessSettings,
+                    child: Text(l10n.enable),
+                  ),
+                  IconButton(
+                    tooltip: l10n.noThanks,
+                    visualDensity: VisualDensity.compact,
+                    iconSize: 18,
+                    icon: const Icon(Icons.close),
+                    onPressed: () => AppSettings.setSizesHint(false),
+                  ),
+                ],
               ),
-              _SizeCell(
-                label: l10n.sizeData,
-                bytes: breakdown.data,
-                theme: theme,
-              ),
-              _SizeCell(
-                label: l10n.sizeCache,
-                bytes: breakdown.cache,
-                theme: theme,
-              ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
   }
+}
+
+/// What the sheet can say about one package's storage.
+class _Sizes {
+  const _Sizes({this.breakdown, this.needsAccess = false});
+
+  final ({int app, int data, int cache, int total})? breakdown;
+  final bool needsAccess;
 }
 
 class _SizeCell extends StatelessWidget {

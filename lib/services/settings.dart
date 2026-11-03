@@ -10,12 +10,18 @@ class AppSettings {
   /// Read by the Kotlin side as `flutter.status_bar_enabled` to decide whether
   /// a memory refresh should also repaint the tray notification (docs/06).
   static const _statusBarKey = 'status_bar_enabled';
+  static const _sizesHintKey = 'sizes_hint_on';
 
   static final ValueNotifier<ThemeMode> themeMode = ValueNotifier(
     ThemeMode.system,
   );
 
   static final ValueNotifier<bool> statusBar = ValueNotifier(false);
+
+  /// Whether the sheet may still explain how to get exact sizes. Default on:
+  /// without it the feature is invisible to anyone who has not granted usage
+  /// access (docs/12 P0-2).
+  static final ValueNotifier<bool> sizesHint = ValueNotifier(true);
 
   static Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
@@ -26,6 +32,7 @@ class AppSettings {
       _ => ThemeMode.system,
     };
     statusBar.value = prefs.getBool(_statusBarKey) ?? false;
+    sizesHint.value = prefs.getBool(_sizesHintKey) ?? true;
   }
 
   static Future<void> setThemeMode(ThemeMode mode) async {
@@ -36,6 +43,12 @@ class AppSettings {
       ThemeMode.dark => 'dark',
       ThemeMode.system => 'system',
     });
+  }
+
+  static Future<void> setSizesHint(bool show) async {
+    sizesHint.value = show;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_sizesHintKey, show);
   }
 
   /// Persists the toggle only. Whether the notification is actually up is the

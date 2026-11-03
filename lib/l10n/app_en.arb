@@ -143,5 +143,8 @@
   "sendFeedback": "Send feedback",
   "privacyPolicy": "Privacy policy",
   "version": "Version",
-  "clearSearch": "Clear search"
+  "clearSearch": "Clear search",
+  "sizesHintTitle": "Exact sizes need usage access",
+  "enable": "Enable",
+  "noThanks": "No thanks"
 }
