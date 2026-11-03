@@ -1,4 +1,4 @@
-# 06 — Status bar notification (free RAM + quick access)
+# 06 — Status bar notification (free RAM + free storage + quick access)
 
 **Priority:** nice-to-have (original app-এ ছিল)
 **Effort:** ৩–৪ ঘণ্টা
@@ -13,7 +13,7 @@ Original app-এ Settings-এ দুইটা toggle আছে: **Status bar** �
 Behaviour:
 
 - Toggle ON → notification tray-তে একটা fixed (ongoing) notification
-- Notification-এ দেখাবে: `Free memory 2.1 GB of 6.0 GB`
+- Notification-এ চোখে পড়বে `Free RAM 2.1 GB` আর `Storage free 18.4 GB`; expand করলে RAM ও storage দুটোর free/total
 - Tap → app খোলে
 - Action button: **Refresh** (value আপডেট করে), **Open** (app খোলে)
 - Toggle OFF → notification যায়

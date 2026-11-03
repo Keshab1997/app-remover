@@ -19,7 +19,7 @@ implemented in Kotlin and exposed over a `MethodChannel`.
 - **Search** — by app name or package name.
 - **Per-app actions** — Open, App info, Search in Google Play, Uninstall.
 - **Multi-select** — checkbox selection, select all, batch uninstall with total size.
-- **Free memory bar** — available RAM from `ActivityManager.MemoryInfo`.
+- **RAM + storage bar** — available RAM from `ActivityManager.MemoryInfo`, free disk space from `StatFs`; tap it for the full breakdown.
 - **Live refresh** — `PACKAGE_ADDED` / `PACKAGE_REMOVED` / `PACKAGE_REPLACED`
   broadcasts trigger a reload while the app is open.
 - **Theme** — system / light / dark, persisted with `shared_preferences`.
@@ -73,6 +73,7 @@ android/app/src/main/kotlin/com/keshabstudios/goodbyeapps/MainActivity.kt
 | `shareApp` | `bool` | `ACTION_SEND` chooser |
 | `openUrl` | `bool` | `ACTION_VIEW` |
 | `freeMemory` | `{available,total,lowMemory}` | `ActivityManager.MemoryInfo` |
+| `freeStorage` | `{available,total}` | `StatFs` on the internal data partition |
 | `appVersion` | `{versionName,versionCode}` | |
 
 `goodbye_apps/events` (`EventChannel`) emits `PACKAGE_ADDED`, `PACKAGE_REMOVED`,
