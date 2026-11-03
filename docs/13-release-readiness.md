@@ -8,9 +8,8 @@ requirements in Play Console before submission.
 - [ ] Verify the public privacy policy at
   `https://keshab1997.github.io/goodbyeapps-legal/privacy-policy.html` loads,
   review its accuracy, and use that URL in Play Console. Confirm the support
-  email `Keshabsarkar2018@gmail.com` can receive messages. Older listing drafts
-  and documents may still mention the previous placeholder address; review and
-  update the Play listing before submission.
+  email `Keshabsarkar2018@gmail.com` can receive messages. Older documents may still mention the previous placeholder address; review
+  the Play listing before submission.
 - [ ] Review Data safety and permission declarations against the actual app and
   all dependencies. Installed-app inventory is sensitive: justify
   `QUERY_ALL_PACKAGES` as core app management and supply the demonstration Play

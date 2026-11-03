@@ -26,4 +26,4 @@ PERMISSIONS
 • Usage access (optional) — only to report app, data and cache sizes
 • Notifications (optional) — only if you turn on the status bar feature
 
-Goodbye Apps is a small, focused utility. If something is missing, tell us at hello@goodbyeapps.com.
+Goodbye Apps is a small, focused utility. If something is missing, tell us at Keshabsarkar2018@gmail.com.
