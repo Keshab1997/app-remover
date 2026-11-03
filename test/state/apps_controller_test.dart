@@ -264,6 +264,43 @@ void main() {
     ]);
   });
 
+  test('a filter chip narrows the tab and a second tap releases it', () async {
+    await controller.load();
+
+    controller.setFilter(AppFilter.large);
+    expect(controller.filter, AppFilter.large);
+    // Nothing in the fake device is 500 MiB, so the honest answer is empty.
+    expect(controller.appsFor(system: false), isEmpty);
+    expect(controller.appsFor(system: true), isEmpty);
+
+    controller.setFilter(AppFilter.large);
+    expect(controller.filter, isNull, reason: 'same chip toggles off');
+    expect(controller.appsFor(system: false).length, 4);
+  });
+
+  test('the unused filter is dropped when usage access is off', () async {
+    await controller.load();
+    controller.setFilter(AppFilter.unused);
+    expect(controller.usageAvailable, isFalse);
+
+    await controller.load();
+
+    // A filter the device cannot answer must not sit there emptying the list.
+    expect(controller.filter, isNull);
+    expect(controller.appsFor(system: false).length, 4);
+  });
+
+  test('clearFilters releases the list', () async {
+    await controller.load();
+    controller.setFilter(AppFilter.large);
+    expect(controller.narrowing, isTrue);
+
+    controller.clearFilters();
+
+    expect(controller.filter, isNull);
+    expect(controller.narrowing, isFalse);
+  });
+
   test('the query filters both tabs', () async {
     await controller.load();
     controller.setQuery('MAP');

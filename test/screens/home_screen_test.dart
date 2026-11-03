@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:goodbye_apps/l10n/generated/app_localizations.dart';
+import 'package:goodbye_apps/models/app_info.dart';
 import 'package:goodbye_apps/screens/home_screen.dart';
+import 'package:goodbye_apps/services/settings.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -11,6 +13,13 @@ void main() {
   late List<Map<String, dynamic>> rows;
 
   setUp(() {
+    // AppSettings is static and HomeScreen writes the tab and the sort through
+    // it, so a test that taps a tab would otherwise start the next one on that
+    // tab - which is exactly the product behaviour being asserted, but not
+    // what these tests mean.
+    AppSettings.systemTab.value = false;
+    AppSettings.sortField.value = SortField.size;
+    AppSettings.sortAscending.value = false;
     rows = [];
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
@@ -139,6 +148,38 @@ void main() {
     await tester.tap(find.byIcon(Icons.select_all));
     await tester.pumpAndSettle();
     expect(find.text('3 selected'), findsOneWidget);
+  });
+
+  testWidgets('a filter chip empties the list and offers a way out', (
+    tester,
+  ) async {
+    rows = [
+      {
+        'packageName': 'com.example.maps',
+        'label': 'Maps',
+        'isSystem': false,
+        'sizeBytes': 100,
+        'firstInstallTime': 1,
+        'lastUpdateTime': 1,
+        'versionName': '1.0',
+        'versionCode': 1,
+      },
+    ];
+    await open(tester);
+
+    expect(find.text('Over 500 MB'), findsOneWidget);
+    // The mock device never grants usage access, so the chip that needs the
+    // stamps is not offered at all.
+    expect(find.text('Not used in 90 days'), findsNothing);
+
+    await tester.tap(find.text('Over 500 MB'));
+    await tester.pumpAndSettle();
+    expect(find.text('Nothing matches these filters'), findsOneWidget);
+
+    await tester.tap(find.text('Clear filters'));
+    await tester.pumpAndSettle();
+    expect(find.text('Maps'), findsOneWidget);
+    expect(find.text('Nothing matches these filters'), findsNothing);
   });
 
   testWidgets('an empty list is still pull-to-refreshable', (tester) async {

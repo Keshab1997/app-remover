@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/generated/app_localizations.dart';
 import '../models/app_info.dart';
 import '../services/icon_store.dart';
 
@@ -25,6 +26,7 @@ class AppTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Card(
       child: InkWell(
@@ -70,10 +72,14 @@ class AppTile extends StatelessWidget {
                         const SizedBox(width: 8),
                         _Dot(color: scheme.outline),
                         const SizedBox(width: 8),
-                        Text(
-                          formatDate(app.changedAt),
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
+                        Flexible(
+                          child: Text(
+                            _changed(l10n),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
                           ),
                         ),
                       ],
@@ -92,7 +98,24 @@ class AppTile extends StatelessWidget {
       ),
     );
   }
+
+  /// The date slot answers "so what". Opened yesterday tells the user nothing
+  /// about whether to remove an app; untouched for a season tells them
+  /// everything, so the stale end of the list says so out loud (docs/12 P1-7).
+  String _changed(AppLocalizations l10n) {
+    final lastUsed = app.lastUsedAt;
+    if (lastUsed != null) {
+      final at = DateTime.fromMillisecondsSinceEpoch(lastUsed);
+      if (DateTime.now().difference(at) > _staleAfter) {
+        return l10n.notOpenedSince(formatDate(at));
+      }
+    }
+    return formatDate(app.changedAt);
+  }
 }
+
+/// Below this, "last opened" is not a signal worth a line of the row.
+const _staleAfter = Duration(days: 30);
 
 /// One row's icon: asks [IconStore] on first build and repaints itself when
 /// the bytes land. Deliberately its own widget, so an icon arriving repaints

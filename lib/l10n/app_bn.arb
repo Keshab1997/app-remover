@@ -98,5 +98,11 @@
   "uninstallNothingRemoved": "কোনো অ্যাপ সরানো হয়নি",
   "tabUserAppsLabel": "ইউজার অ্যাপ",
   "tabSystemAppsLabel": "সিস্টেম অ্যাপ",
-  "selectAllInTab": "{tab}-এ {count}টি বেছে নিন"
+  "selectAllInTab": "{tab}-এ {count}টি বেছে নিন",
+  "filterUnused": "৯০ দিন ব্যবহার হয়নি",
+  "filterLarge": "৫০০ MB-এর বেশি",
+  "filterRecent": "সম্প্রতি ইনস্টল",
+  "notOpenedSince": "{date}-এর পর খোলা হয়নি",
+  "filtersMatchNothing": "এই ফিল্টারে কিছু মেলেনি",
+  "clearFilters": "ফিল্টার মুছুন"
 }

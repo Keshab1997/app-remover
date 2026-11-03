@@ -571,6 +571,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select all {count} in {tab}'**
   String selectAllInTab(Object count, Object tab);
+
+  /// No description provided for @filterUnused.
+  ///
+  /// In en, this message translates to:
+  /// **'Not used in 90 days'**
+  String get filterUnused;
+
+  /// No description provided for @filterLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Over 500 MB'**
+  String get filterLarge;
+
+  /// No description provided for @filterRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed recently'**
+  String get filterRecent;
+
+  /// No description provided for @notOpenedSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Not opened since {date}'**
+  String notOpenedSince(Object date);
+
+  /// No description provided for @neverOpened.
+  ///
+  /// In en, this message translates to:
+  /// **'Not opened in the last year'**
+  String get neverOpened;
+
+  /// No description provided for @filtersMatchNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches these filters'**
+  String get filtersMatchNothing;
+
+  /// No description provided for @clearFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get clearFilters;
 }
 
 class _AppLocalizationsDelegate

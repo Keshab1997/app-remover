@@ -12,6 +12,7 @@ class AppInfo {
     required this.lastUpdateTime,
     required this.versionName,
     required this.versionCode,
+    this.lastUsedAt,
   });
 
   final String packageName;
@@ -22,6 +23,12 @@ class AppInfo {
   final int lastUpdateTime;
   final String versionName;
   final int versionCode;
+
+  /// When the launcher last brought the app to the foreground, in epoch ms, or
+  /// `null` when usage access is off or no bucket covers it. `null` with usage
+  /// access granted means "not opened in the last year" - the answer the
+  /// filters want, not a missing value (docs/12 P1-7).
+  final int? lastUsedAt;
 
   DateTime get installedAt =>
       DateTime.fromMillisecondsSinceEpoch(firstInstallTime);
@@ -43,6 +50,7 @@ class AppInfo {
       lastUpdateTime: (map['lastUpdateTime'] as num?)?.toInt() ?? 0,
       versionName: map['versionName'] as String? ?? '',
       versionCode: (map['versionCode'] as num?)?.toInt() ?? 0,
+      lastUsedAt: (map['lastTimeUsed'] as num?)?.toInt(),
     );
   }
 
@@ -55,6 +63,41 @@ class AppInfo {
 }
 
 enum SortField { name, date, size }
+
+/// A question the list can be narrowed to. Each one is a reason to uninstall,
+/// which is the only reason a user opens an app like this.
+enum AppFilter {
+  /// Not opened in the last 90 days - or, with usage access on, not opened in
+  /// the whole year the stats cover.
+  unused,
+
+  /// Big enough that removing it is worth a tap.
+  large,
+
+  /// Installed in the last two weeks, i.e. still being decided about.
+  recent;
+
+  /// Bytes `large` starts at: 500 MiB, matching how [formatBytes] spells MB.
+  static const largeBytes = 500 << 20;
+
+  static const unusedWindow = Duration(days: 90);
+  static const recentWindow = Duration(days: 14);
+
+  bool matches(AppInfo app, {DateTime? now}) {
+    final at = now ?? DateTime.now();
+    final lastUsed = app.lastUsedAt;
+    return switch (this) {
+      unused =>
+        // Without a stamp the only honest reading is "has not been opened in
+        // the window the stats cover", which is what this filter asks.
+        lastUsed == null ||
+            at.difference(DateTime.fromMillisecondsSinceEpoch(lastUsed)) >
+                unusedWindow,
+      large => app.sizeBytes >= largeBytes,
+      recent => at.difference(app.installedAt) <= recentWindow,
+    };
+  }
+}
 
 /// Human readable byte size, e.g. 12.4 MB.
 String formatBytes(int bytes) {

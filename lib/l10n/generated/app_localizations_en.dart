@@ -277,4 +277,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String selectAllInTab(Object count, Object tab) {
     return 'Select all $count in $tab';
   }
+
+  @override
+  String get filterUnused => 'Not used in 90 days';
+
+  @override
+  String get filterLarge => 'Over 500 MB';
+
+  @override
+  String get filterRecent => 'Installed recently';
+
+  @override
+  String notOpenedSince(Object date) {
+    return 'Not opened since $date';
+  }
+
+  @override
+  String get neverOpened => 'Not opened in the last year';
+
+  @override
+  String get filtersMatchNothing => 'Nothing matches these filters';
+
+  @override
+  String get clearFilters => 'Clear filters';
 }

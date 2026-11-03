@@ -8,6 +8,7 @@ AppInfo _app({
   int sizeBytes = 0,
   int firstInstallTime = 0,
   int lastUpdateTime = 0,
+  int? lastUsedAt,
 }) {
   return AppInfo(
     packageName: packageName,
@@ -18,6 +19,7 @@ AppInfo _app({
     lastUpdateTime: lastUpdateTime,
     versionName: '1.0',
     versionCode: 1,
+    lastUsedAt: lastUsedAt,
   );
 }
 
@@ -41,6 +43,24 @@ void main() {
       expect(app.sizeBytes, 2048);
       expect(app.versionName, '2.1');
       expect(app.versionCode, 21);
+    });
+
+    test('carries the last-opened stamp, and its absence', () {
+      final Map<String, dynamic> row = {
+        'packageName': 'com.example.app',
+        'label': 'Example',
+        'isSystem': false,
+        'sizeBytes': 1,
+        'firstInstallTime': 0,
+        'lastUpdateTime': 0,
+        'versionName': '1.0',
+        'versionCode': 1,
+      };
+
+      expect(AppInfo.fromMap(row).lastUsedAt, isNull);
+
+      row['lastTimeUsed'] = 5000;
+      expect(AppInfo.fromMap(row).lastUsedAt, 5000);
     });
 
     test('falls back to safe defaults for absent keys', () {
@@ -143,6 +163,57 @@ void main() {
     test('a previous year is shown in full', () {
       final year = DateTime.now().year - 1;
       expect(formatDate(DateTime(year, 11, 3)), '3 Nov $year');
+    });
+  });
+  group('AppFilter', () {
+    final now = DateTime.utc(2026, 11, 3);
+    DateTime daysAgo(int days) => now.subtract(Duration(days: days));
+
+    test('unused covers the stale and the never-opened', () {
+      expect(
+        AppFilter.unused.matches(
+          _app(lastUsedAt: daysAgo(120).millisecondsSinceEpoch),
+          now: now,
+        ),
+        isTrue,
+      );
+      expect(
+        AppFilter.unused.matches(
+          _app(lastUsedAt: daysAgo(4).millisecondsSinceEpoch),
+          now: now,
+        ),
+        isFalse,
+      );
+      // No bucket in the yearly stats is the strongest signal there is.
+      expect(AppFilter.unused.matches(_app(), now: now), isTrue);
+    });
+
+    test('large starts at 500 MiB', () {
+      expect(
+        AppFilter.large.matches(_app(sizeBytes: AppFilter.largeBytes - 1)),
+        isFalse,
+      );
+      expect(
+        AppFilter.large.matches(_app(sizeBytes: AppFilter.largeBytes)),
+        isTrue,
+      );
+    });
+
+    test('recent is the fortnight after an install', () {
+      expect(
+        AppFilter.recent.matches(
+          _app(firstInstallTime: daysAgo(3).millisecondsSinceEpoch),
+          now: now,
+        ),
+        isTrue,
+      );
+      expect(
+        AppFilter.recent.matches(
+          _app(firstInstallTime: daysAgo(40).millisecondsSinceEpoch),
+          now: now,
+        ),
+        isFalse,
+      );
     });
   });
 }

@@ -278,4 +278,27 @@ class AppLocalizationsBn extends AppLocalizations {
   String selectAllInTab(Object count, Object tab) {
     return '$tab-এ $countটি বেছে নিন';
   }
+
+  @override
+  String get filterUnused => '৯০ দিন ব্যবহার হয়নি';
+
+  @override
+  String get filterLarge => '৫০০ MB-এর বেশি';
+
+  @override
+  String get filterRecent => 'সম্প্রতি ইনস্টল';
+
+  @override
+  String notOpenedSince(Object date) {
+    return '$date-এর পর খোলা হয়নি';
+  }
+
+  @override
+  String get neverOpened => 'গত এক বছরে খোলা হয়নি';
+
+  @override
+  String get filtersMatchNothing => 'এই ফিল্টারে কিছু মেলেনি';
+
+  @override
+  String get clearFilters => 'ফিল্টার মুছুন';
 }

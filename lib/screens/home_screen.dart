@@ -219,43 +219,85 @@ class _HomeScreenState extends State<HomeScreen>
     final apps = _apps.appsFor(system: system);
     if (apps.isEmpty) {
       // The copy below promises a pull; without the wrapper here it would be
-      // a dead instruction exactly when there is nothing else to tap.
+      // a dead instruction exactly when there was nothing else to tap. And the
+      // reason for an empty list is now a third thing: a filter can empty it.
+      final byQuery = _apps.query.isNotEmpty;
+      final byFilter = _apps.filter != null;
+      Widget action(String label, VoidCallback onPressed) =>
+          FilledButton.tonal(onPressed: onPressed, child: Text(label));
       return _refreshable(
         _EmptyState(
-          icon: _apps.query.isEmpty ? Icons.apps_outlined : Icons.search_off,
-          title: _apps.query.isEmpty ? l10n.appsNotFound : l10n.noMatches,
-          subtitle: _apps.query.isEmpty
-              ? l10n.pullToRefresh
-              : l10n.tryDifferentSearch,
-          action: _apps.query.isEmpty
-              ? FilledButton.tonal(
-                  onPressed: _apps.load,
-                  child: Text(l10n.refresh),
-                )
-              : FilledButton.tonal(
-                  onPressed: () {
-                    _search.clear();
-                    _apps.setQuery('');
-                  },
-                  child: Text(l10n.clearSearch),
-                ),
+          icon: byFilter
+              ? Icons.filter_alt_off
+              : (byQuery ? Icons.search_off : Icons.apps_outlined),
+          title: byFilter
+              ? l10n.filtersMatchNothing
+              : (byQuery ? l10n.noMatches : l10n.appsNotFound),
+          subtitle: byQuery ? l10n.tryDifferentSearch : l10n.pullToRefresh,
+          action: byFilter
+              ? action(l10n.clearFilters, _apps.clearFilters)
+              : byQuery
+              ? action(l10n.clearSearch, () {
+                  _search.clear();
+                  _apps.setQuery('');
+                })
+              : action(l10n.refresh, _apps.load),
         ),
       );
     }
     return _refreshable(
-      ListView.builder(
-        padding: const EdgeInsets.only(top: 8, bottom: 96),
-        itemCount: apps.length,
-        itemBuilder: (context, index) {
-          final app = apps[index];
-          return AppTile(
-            app: app,
-            selected: _apps.selected.contains(app.packageName),
-            onTap: () => _showActions(app),
-            onLongPress: () => _apps.toggleSelected(app.packageName),
-            onSelectedChanged: (_) => _apps.toggleSelected(app.packageName),
-          );
-        },
+      Column(
+        children: [
+          _filterChips(),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.only(top: 8, bottom: 96),
+              itemCount: apps.length,
+              itemBuilder: (context, index) {
+                final app = apps[index];
+                return AppTile(
+                  app: app,
+                  selected: _apps.selected.contains(app.packageName),
+                  onTap: () => _showActions(app),
+                  onLongPress: () => _apps.toggleSelected(app.packageName),
+                  onSelectedChanged: (_) =>
+                      _apps.toggleSelected(app.packageName),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// One reason to uninstall, one tap away. A chip the device cannot answer is
+  /// not shown at all: a greyed-out "not used in 90 days" waiting on a
+  /// permission the user has not granted is an ad, not a filter
+  /// (docs/12 P1-7).
+  Widget _filterChips() {
+    final l10n = AppLocalizations.of(context);
+    final chips = <(AppFilter, String)>[
+      if (_apps.usageAvailable) (AppFilter.unused, l10n.filterUnused),
+      (AppFilter.large, l10n.filterLarge),
+      (AppFilter.recent, l10n.filterRecent),
+    ];
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: Row(
+        children: [
+          for (final (filter, label) in chips)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilterChip(
+                label: Text(label),
+                selected: _apps.filter == filter,
+                showCheckmark: false,
+                onSelected: (_) => _apps.setFilter(filter),
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -11,7 +11,8 @@ import '../services/settings.dart';
 enum AppLoadFailure { listUnavailable }
 
 class AppsController extends ChangeNotifier {
-  AppsController() {
+  AppsController({DateTime Function()? clock})
+    : _clock = clock ?? DateTime.now {
     _subscription = NativeApps.packageChanges().listen((_) => load());
   }
 
@@ -21,6 +22,9 @@ class AppsController extends ChangeNotifier {
   bool _loading = true;
   AppLoadFailure? _failure;
   String _query = '';
+  final DateTime Function() _clock;
+  AppFilter? _filter;
+  bool _usageAvailable = false;
   // Largest first: the list exists so the user can find what to remove, and
   // size is the ordering that answers that. Both are restored from the store,
   // so a person who sorts differently once keeps it (docs/12 P1-6).
@@ -41,9 +45,37 @@ class AppsController extends ChangeNotifier {
   int get totalRam => _totalRam;
   int get installedCount => _all.length;
 
+  /// Whether the last-opened stamps came with the list, i.e. whether the
+  /// "not used in 90 days" chip can be answered at all.
+  bool get usageAvailable => _usageAvailable;
+
+  AppFilter? get filter => _filter;
+
+  /// Anything at all narrowing the list, which the empty state reads to decide
+  /// whether to blame the search box or the filters.
+  bool get narrowing => _query.isNotEmpty || _filter != null;
+
+  void setFilter(AppFilter value) {
+    // Tapping the chip that is already on turns it off: a filter with no way
+    // out is a trap on a 200-row list.
+    _filter = _filter == value ? null : value;
+    notifyListeners();
+  }
+
+  void clearFilters() {
+    if (_filter == null) return;
+    _filter = null;
+    notifyListeners();
+  }
+
   List<AppInfo> appsFor({required bool system}) {
+    final filter = _filter;
+    final now = _clock();
     final filtered = _all.where(
-      (app) => app.isSystem == system && app.matches(_query),
+      (app) =>
+          app.isSystem == system &&
+          app.matches(_query) &&
+          (filter == null || filter.matches(app, now: now)),
     );
     final list = filtered.toList();
     list.sort((a, b) {
@@ -87,6 +119,10 @@ class AppsController extends ChangeNotifier {
     try {
       final apps = await NativeApps.listApps();
       _all = apps;
+      _usageAvailable = await _hasUsageAccess();
+      // Access revoked since the chip was tapped must not leave the list
+      // looking empty for a reason the user cannot act on.
+      if (!_usageAvailable && _filter == AppFilter.unused) _filter = null;
       _selected.removeWhere(
         (pkg) => !_all.any((app) => app.packageName == pkg),
       );
@@ -97,6 +133,16 @@ class AppsController extends ChangeNotifier {
     } finally {
       _loading = false;
       notifyListeners();
+    }
+  }
+
+  /// Never lets the informational check below fail the whole load; on a
+  /// platform with no channel there is simply no answer.
+  Future<bool> _hasUsageAccess() async {
+    try {
+      return await NativeApps.hasUsageAccess();
+    } catch (_) {
+      return false;
     }
   }
 

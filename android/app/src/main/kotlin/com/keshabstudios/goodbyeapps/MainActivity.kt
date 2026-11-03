@@ -3,6 +3,8 @@ package com.keshabstudios.goodbyeapps
 import android.app.ActivityManager
 import android.app.AppOpsManager
 import android.app.usage.StorageStatsManager
+import android.app.usage.UsageStats
+import android.app.usage.UsageStatsManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -232,6 +234,12 @@ class MainActivity : FlutterActivity() {
             pm.getInstalledApplications(0)
         }
 
+        // Last-opened stamps answer "which of these do I actually use?". They
+        // live behind the same permission as the size breakdown, so one yearly
+        // query on this (background) thread feeds every row - never a query per
+        // package (docs/12 P1-7).
+        val lastUsed = lastUsedTimes()
+
         val out = ArrayList<Map<String, Any?>>(infos.size)
         for (ai in infos) {
             if (ai.packageName == packageName) continue
@@ -254,10 +262,38 @@ class MainActivity : FlutterActivity() {
                 "firstInstallTime" to (pkgInfo?.firstInstallTime ?: 0L),
                 "lastUpdateTime" to (pkgInfo?.lastUpdateTime ?: 0L),
                 "versionName" to (pkgInfo?.versionName ?: ""),
-                "versionCode" to (if (pkgInfo != null) packageInfoVersionCode(pkgInfo) else 0L)
+                "versionCode" to (if (pkgInfo != null) packageInfoVersionCode(pkgInfo) else 0L),
+                // Absent means "no bucket in the last year", which the app
+                // reads as "not opened recently" rather than as unknown.
+                "lastTimeUsed" to lastUsed[ai.packageName]
             ))
         }
         return out
+    }
+
+    private fun lastUsedTimes(): Map<String, Long> {
+        if (!hasUsageAccess()) return emptyMap()
+        return try {
+            val manager =
+                getSystemService(UsageStatsManager::class.java) ?: return emptyMap()
+            val end = System.currentTimeMillis()
+            val begin = end - 365L * 24 * 60 * 60 * 1000
+            val out = HashMap<String, Long>()
+            val stats: List<UsageStats>? =
+                manager.queryUsageStats(UsageStatsManager.INTERVAL_YEAR, begin, end)
+            stats?.forEach { stat ->
+                val pkg = stat.packageName ?: return@forEach
+                val last = stat.lastTimeUsed
+                if (last <= 0L) return@forEach
+                val seen = out[pkg]
+                if (seen == null || last > seen) out[pkg] = last
+            }
+            out
+        } catch (t: Throwable) {
+            // SecurityException if access was revoked between the check and the
+            // query; the list is still worth showing without the stamps.
+            emptyMap()
+        }
     }
 
     private fun packageInfoVersionCode(info: android.content.pm.PackageInfo): Long {
