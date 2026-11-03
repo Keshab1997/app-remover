@@ -151,5 +151,14 @@
   "phoneStorage": "ফোনের স্টোরেজ",
   "storageNotRam": "অ্যাপ ও ফাইলের জায়গা — RAM নয়",
   "uninstallDone": "পরিষ্কার সম্পন্ন",
-  "uninstallKept": "{count}টি রাখা হয়েছে"
+  "uninstallKept": "{count}টি রাখা হয়েছে",
+  "onboardingSkip": "এড়িয়ে যান",
+  "onboardingNext": "পরবর্তী",
+  "onboardingStart": "শুরু করুন",
+  "onboardingWelcomeTitle": "দরকারি জিনিসের জন্য জায়গা করুন",
+  "onboardingWelcomeBody": "আপনার ডিভাইসে ইনস্টল করা অ্যাপ এক জায়গায় খুঁজুন ও পরিচালনা করুন।",
+  "onboardingManageTitle": "সরানোর জন্য অ্যাপ খুঁজুন",
+  "onboardingManageBody": "অ্যাপ খুঁজুন, সাজান ও নির্বাচন করুন। প্রতিটি আনইনস্টলের আগে Android আপনার নিশ্চিতকরণ চাইবে।",
+  "onboardingPrivacyTitle": "নিয়ন্ত্রণ আপনার হাতেই",
+  "onboardingPrivacyBody": "আপনার অ্যাপের তালিকা ডিভাইসেই থাকে। বিস্তারিত সাইজের জন্য usage access এবং নোটিফিকেশন ঐচ্ছিক।"
 }

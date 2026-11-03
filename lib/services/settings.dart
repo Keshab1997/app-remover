@@ -9,6 +9,9 @@ class AppSettings {
   AppSettings._();
 
   static const _themeKey = 'theme_mode';
+  static const _onboardingKey = 'onboarding_complete';
+
+  static final ValueNotifier<bool> onboardingComplete = ValueNotifier(false);
 
   /// Read by the Kotlin side as `flutter.status_bar_enabled` to decide whether
   /// a memory refresh should also repaint the tray notification (docs/06).
@@ -54,6 +57,7 @@ class AppSettings {
 
   static Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
+    onboardingComplete.value = prefs.getBool(_onboardingKey) ?? false;
     final stored = prefs.getString(_themeKey);
     themeMode.value = switch (stored) {
       'light' => ThemeMode.light,
@@ -73,6 +77,11 @@ class AppSettings {
       prefs.getStringList(_searchHistoryKey) ?? const [],
     );
     offlineNoteSeen.value = prefs.getBool(_offlineNoteSeenKey) ?? false;
+  }
+
+  static Future<void> completeOnboarding() async {
+    await _persist((prefs) => prefs.setBool(_onboardingKey, true));
+    onboardingComplete.value = true;
   }
 
   static Future<void> rememberSearch(String query) async {

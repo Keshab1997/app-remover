@@ -232,5 +232,14 @@
         "type": "int"
       }
     }
-  }
+  },
+  "onboardingSkip": "Skip",
+  "onboardingNext": "Next",
+  "onboardingStart": "Get started",
+  "onboardingWelcomeTitle": "Make space for what matters",
+  "onboardingWelcomeBody": "Find and manage the apps installed on your device, all in one place.",
+  "onboardingManageTitle": "Find apps to remove",
+  "onboardingManageBody": "Search, sort and select apps. Android will ask you to confirm each uninstall.",
+  "onboardingPrivacyTitle": "You stay in control",
+  "onboardingPrivacyBody": "Your app list stays on your device. Usage access for detailed sizes and notifications are optional."
 }

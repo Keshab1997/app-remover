@@ -369,4 +369,34 @@ class AppLocalizationsBn extends AppLocalizations {
   String uninstallKept(int count) {
     return '$countটি রাখা হয়েছে';
   }
+
+  @override
+  String get onboardingSkip => 'এড়িয়ে যান';
+
+  @override
+  String get onboardingNext => 'পরবর্তী';
+
+  @override
+  String get onboardingStart => 'শুরু করুন';
+
+  @override
+  String get onboardingWelcomeTitle => 'দরকারি জিনিসের জন্য জায়গা করুন';
+
+  @override
+  String get onboardingWelcomeBody =>
+      'আপনার ডিভাইসে ইনস্টল করা অ্যাপ এক জায়গায় খুঁজুন ও পরিচালনা করুন।';
+
+  @override
+  String get onboardingManageTitle => 'সরানোর জন্য অ্যাপ খুঁজুন';
+
+  @override
+  String get onboardingManageBody =>
+      'অ্যাপ খুঁজুন, সাজান ও নির্বাচন করুন। প্রতিটি আনইনস্টলের আগে Android আপনার নিশ্চিতকরণ চাইবে।';
+
+  @override
+  String get onboardingPrivacyTitle => 'নিয়ন্ত্রণ আপনার হাতেই';
+
+  @override
+  String get onboardingPrivacyBody =>
+      'আপনার অ্যাপের তালিকা ডিভাইসেই থাকে। বিস্তারিত সাইজের জন্য usage access এবং নোটিফিকেশন ঐচ্ছিক।';
 }

@@ -369,4 +369,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String uninstallKept(int count) {
     return '$count kept';
   }
+
+  @override
+  String get onboardingSkip => 'Skip';
+
+  @override
+  String get onboardingNext => 'Next';
+
+  @override
+  String get onboardingStart => 'Get started';
+
+  @override
+  String get onboardingWelcomeTitle => 'Make space for what matters';
+
+  @override
+  String get onboardingWelcomeBody =>
+      'Find and manage the apps installed on your device, all in one place.';
+
+  @override
+  String get onboardingManageTitle => 'Find apps to remove';
+
+  @override
+  String get onboardingManageBody =>
+      'Search, sort and select apps. Android will ask you to confirm each uninstall.';
+
+  @override
+  String get onboardingPrivacyTitle => 'You stay in control';
+
+  @override
+  String get onboardingPrivacyBody =>
+      'Your app list stays on your device. Usage access for detailed sizes and notifications are optional.';
 }

@@ -745,6 +745,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} kept'**
   String uninstallKept(int count);
+
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardingSkip;
+
+  /// No description provided for @onboardingNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get onboardingNext;
+
+  /// No description provided for @onboardingStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get onboardingStart;
+
+  /// No description provided for @onboardingWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Make space for what matters'**
+  String get onboardingWelcomeTitle;
+
+  /// No description provided for @onboardingWelcomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Find and manage the apps installed on your device, all in one place.'**
+  String get onboardingWelcomeBody;
+
+  /// No description provided for @onboardingManageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find apps to remove'**
+  String get onboardingManageTitle;
+
+  /// No description provided for @onboardingManageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Search, sort and select apps. Android will ask you to confirm each uninstall.'**
+  String get onboardingManageBody;
+
+  /// No description provided for @onboardingPrivacyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You stay in control'**
+  String get onboardingPrivacyTitle;
+
+  /// No description provided for @onboardingPrivacyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your app list stays on your device. Usage access for detailed sizes and notifications are optional.'**
+  String get onboardingPrivacyBody;
 }
 
 class _AppLocalizationsDelegate

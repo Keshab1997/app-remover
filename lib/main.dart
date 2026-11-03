@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'l10n/generated/app_localizations.dart';
 import 'screens/home_screen.dart';
+import 'screens/onboarding_screen.dart';
 import 'services/settings.dart';
 
 Future<void> main() async {
@@ -28,7 +29,12 @@ class AppRemoverApp extends StatelessWidget {
           themeMode: mode,
           theme: _buildTheme(Brightness.light),
           darkTheme: _buildTheme(Brightness.dark),
-          home: const HomeScreen(),
+          home: ValueListenableBuilder<bool>(
+            valueListenable: AppSettings.onboardingComplete,
+            builder: (context, complete, _) => complete
+                ? const HomeScreen()
+                : OnboardingScreen(onComplete: AppSettings.completeOnboarding),
+          ),
         );
       },
     );
