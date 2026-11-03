@@ -31,7 +31,7 @@
   "freeMemory": "ফ্রি মেমোরি",
   "usedOfTotal": "{used} / {total} ব্যবহৃত",
   "uninstall": "আনইনস্টল",
-  "uninstallOne": "অ্যাপ আনইনস্টল করবেন?",
+  "tapAgainToUninstall": "নিশ্চিত করতে আবার চাপুন",
   "uninstallMany": "{count}টি অ্যাপ আনইনস্টল করবেন?",
   "uninstallConfirmBody": "প্রতিটি আনইনস্টলের জন্য সিস্টেম আবার জিজ্ঞাসা করবে।",
   "open": "খুলুন",
@@ -73,16 +73,6 @@
   "sizesHintTitle": "সঠিক সাইজের জন্য usage access লাগে",
   "enable": "চালু করুন",
   "noThanks": "লাগবে না",
-  "@uninstallSummary": {
-    "placeholders": {
-      "size": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "uninstallingProgress": "{total}টির মধ্যে {done}টি সরানো হচ্ছে",
   "@uninstallingProgress": {
     "placeholders": {

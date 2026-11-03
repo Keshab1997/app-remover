@@ -113,7 +113,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get uninstall => 'আনইনস্টল';
 
   @override
-  String get uninstallOne => 'অ্যাপ আনইনস্টল করবেন?';
+  String get tapAgainToUninstall => 'নিশ্চিত করতে আবার চাপুন';
 
   @override
   String uninstallMany(int count) {

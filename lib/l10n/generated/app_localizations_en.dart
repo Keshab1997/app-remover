@@ -113,7 +113,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get uninstall => 'Uninstall';
 
   @override
-  String get uninstallOne => 'Uninstall app?';
+  String get tapAgainToUninstall => 'Tap again to confirm';
 
   @override
   String uninstallMany(int count) {

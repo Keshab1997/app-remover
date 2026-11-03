@@ -221,6 +221,23 @@ strip। দুটো অ্যাডাপ্টেশন:
 
 ---
 
+## P2-15 — Uninstall-এ popup কমানো (user drop-off)
+
+আগে: app खुদ একটা confirm dialog, তারপর Android-এর own dialog — মানে একটা app
+मुছতেই ২টা popup, ৬টা select করলে ৭টা। Android-এর dialogটা সাধারণ app
+skip করতে পারে না (package installer-এর own confirmation, `REQUEST_DELETE_PACKAGES`
+শুধু নিজের app-এর জন্য), তাই বাঁচানো যায় শুধু যেটা আমরা নিজে যোগ করি।
+
+এখন: single selection = এক tap-এ সরাসরি system dialog। batch (>1) = same bar-এর
+ভিতরেই inline confirm — প্রথম tap-এ button লাল হয়ে "Tap again to confirm" বলে,
+বাঁয়ে প্রশ্ন দাঁড়ায় "Uninstall 30 apps?", আর ২৫-এর বেশি হলে fatigue warning-টা
+ও একই জায়গায়। কোনো modal না, অ্যাক্সিডেন্টাল batch-এর ভয়ও না। ৬ সেকেন্ডে
+নিজের থেকেই disarm, আর selection বদলালেও disarm (count match করে না)।
+চলমান run-এর progress+ফলাফল এখন bottom bar-এর ভিতরেই (৩px line +
+"Removing 2 of 6"), dialog-এর ভিতরে না।
+
+---
+
 ## Acceptance
 
 - [x] empty + error state-এ pull করলে refresh হয়, নাহলে copy মিথ্যা — `6375bb4`
@@ -252,6 +269,7 @@ strip। দুটো অ্যাডাপ্টেশন:
 | P2-12 | `baba4a5` | Semantics label, meta line bodySmall, 3× fontScale test |
 | P2-13 | `5320059` | 600dp+ গ্রিড, `showAdaptiveDialog`, 420dp overflow ঠিক |
 | P2-14 | `f954f0e` | recent badge, copy package name, >25 warning, offline note, search history |
+| P2-15 | (এই commit) | confirm modal বাদ: batch inline two-tap, single এক tap-এ system dialog |
 
 ### ডিভাইস ছাড়া যা যাচাই হয়নি
 

@@ -284,11 +284,11 @@ abstract class AppLocalizations {
   /// **'Uninstall'**
   String get uninstall;
 
-  /// No description provided for @uninstallOne.
+  /// No description provided for @tapAgainToUninstall.
   ///
   /// In en, this message translates to:
-  /// **'Uninstall app?'**
-  String get uninstallOne;
+  /// **'Tap again to confirm'**
+  String get tapAgainToUninstall;
 
   /// No description provided for @uninstallMany.
   ///

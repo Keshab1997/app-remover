@@ -78,7 +78,7 @@
     }
   },
   "uninstall": "Uninstall",
-  "uninstallOne": "Uninstall app?",
+  "tapAgainToUninstall": "Tap again to confirm",
   "uninstallMany": "Uninstall {count} apps?",
   "@uninstallMany": {
     "placeholders": {
@@ -147,16 +147,6 @@
   "sizesHintTitle": "Exact sizes need usage access",
   "enable": "Enable",
   "noThanks": "No thanks",
-  "@uninstallSummary": {
-    "placeholders": {
-      "size": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "uninstallingProgress": "Removing {done} of {total}",
   "@uninstallingProgress": {
     "placeholders": {

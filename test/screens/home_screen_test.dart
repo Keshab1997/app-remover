@@ -514,9 +514,7 @@ void main() {
     expect(find.text('Copy package name'), findsNothing);
   });
 
-  testWidgets('a 30-app batch is warned about before it starts', (
-    tester,
-  ) async {
+  testWidgets('a batch confirms in the bar instead of another dialog', (tester) async {
     rows = [
       for (var i = 0; i < 30; i++)
         {
@@ -536,13 +534,52 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.select_all));
     await tester.pumpAndSettle();
+
     await tester.tap(find.widgetWithText(FilledButton, 'Uninstall'));
     await tester.pumpAndSettle();
 
+    // The bar becomes the question: no modal, but no accidental 30-app run
+    // either (docs/12 P2-15).
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.text('Uninstall 30 apps?'), findsOneWidget);
+    expect(
+      find.text('The system will ask you to confirm each uninstall.'),
+      findsOneWidget,
+    );
     expect(
       find.text('Each app asks for its own confirmation: 30 dialogs in a row'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('one app costs one tap and one popup: the system one', (tester) async {
+    rows = [
+      {
+        'packageName': 'com.example.maps',
+        'label': 'Maps',
+        'isSystem': false,
+        'sizeBytes': 100,
+        'firstInstallTime': 1,
+        'lastUpdateTime': 1,
+        'versionName': '1.0',
+        'versionCode': 1,
+      },
+    ];
+    await open(tester);
+
+    await tester.longPress(find.text('Maps'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Uninstall'));
+    // The controller waits out the gap Android needs between dialogs.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 700));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.text('Tap again to confirm'), findsNothing);
+    // The fake device reports the system dialog as declined, which is now
+    // visible instead of a silent return to the list.
+    expect(find.text('No apps were removed'), findsOneWidget);
   });
 
   testWidgets('search remembers what you typed', (tester) async {

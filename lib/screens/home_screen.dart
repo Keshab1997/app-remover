@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -29,6 +31,13 @@ class _HomeScreenState extends State<HomeScreen>
   final TextEditingController _search = TextEditingController();
   bool _searching = false;
 
+  /// How many apps the bar is currently asking about, 0 when it asks nothing.
+  /// The number is the arm: any change to the selection disarms it, so a
+  /// "confirm" can never be left standing on top of a different list.
+  int _armedCount = 0;
+  Timer? _armTimer;
+  static const _armWindow = Duration(seconds: 6);
+
   @override
   void initState() {
     super.initState();
@@ -45,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   void dispose() {
+    _armTimer?.cancel();
     _tabs.removeListener(_trackTab);
     _apps.dispose();
     _tabs.dispose();
@@ -506,30 +516,142 @@ class _HomeScreenState extends State<HomeScreen>
 
   // ------------------------------------------------------------ selection
 
+  /// The bar itself is the confirmation, so a batch costs no extra popup.
   Widget _selectionBar() {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
+    final count = _apps.selected.length;
+    final progress = _apps.uninstallProgress;
+    final running = progress != null;
+    final armed = !running && _armedCount == count && count > 1;
+    final body = running
+        ? l10n.uninstallingProgress(progress.done + 1, progress.total)
+        : armed
+        ? l10n.uninstallMany(count)
+        : l10n.appsAndSize(count, formatBytes(_apps.selectedSize));
     return SafeArea(
+      top: false,
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 8, 12, 8),
         color: scheme.surfaceContainer,
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Expanded(
-              child: Text(
-                l10n.appsAndSize(
-                  _apps.selected.length,
-                  formatBytes(_apps.selectedSize),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    body,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleSmall,
+                  ),
                 ),
-                style: Theme.of(context).textTheme.titleSmall,
+                const SizedBox(width: 8),
+                FilledButton.icon(
+                  onPressed: running ? null : _onUninstallPressed,
+                  icon: Icon(
+                    running
+                        ? Icons.hourglass_top
+                        : armed
+                        ? Icons.warning_amber_rounded
+                        : Icons.delete_outline,
+                  ),
+                  label: Text(
+                    running
+                        ? l10n.uninstall
+                        : armed
+                        ? l10n.tapAgainToUninstall
+                        : l10n.uninstall,
+                  ),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: armed ? scheme.error : null,
+                    foregroundColor: armed ? scheme.onError : null,
+                  ),
+                ),
+              ],
+            ),
+            if (running) ...[
+              const SizedBox(height: 6),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(2),
+                child: LinearProgressIndicator(
+                  value: progress.total == 0
+                      ? null
+                      : progress.done / progress.total,
+                  minHeight: 3,
+                ),
               ),
-            ),
-            FilledButton.icon(
-              onPressed: _confirmUninstallSelected,
-              icon: const Icon(Icons.delete_outline),
-              label: Text(l10n.uninstall),
-            ),
+            ] else if (armed) ...[
+              const SizedBox(height: 2),
+              Text(
+                l10n.uninstallConfirmBody,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+              if (count > _confirmFatigueCount)
+                Text(
+                  l10n.uninstallManyWarning(count),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.error,
+                  ),
+                ),
+            ],
           ],
+        ),
+      ),
+    );
+  }
+
+  /// One tap starts a single uninstall; a batch needs the same tap twice.
+  ///
+  /// This used to be a dialog on top of Android's own dialog, which made two
+  /// popups for one app and N+1 for a batch. Android will not let an ordinary
+  /// app skip the system confirmation, so the saving had to come from the one
+  /// popup we own.
+  void _onUninstallPressed() {
+    final count = _apps.selected.length;
+    if (count == 0) return;
+    if (count > 1 && _armedCount != count) {
+      setState(() => _armedCount = count);
+      _armTimer?.cancel();
+      _armTimer = Timer(_armWindow, () => setState(_disarm));
+      return;
+    }
+    unawaited(_runUninstall());
+  }
+
+  void _disarm() {
+    _armTimer?.cancel();
+    _armTimer = null;
+    _armedCount = 0;
+  }
+
+  Future<void> _runUninstall() async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final summary = await _apps.uninstallSelected();
+    if (mounted) setState(_disarm);
+    if (summary == null) return;
+    if (summary.removed == 0) {
+      // Every system dialog was declined: say so instead of closing silently.
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.uninstallNothingRemoved)),
+      );
+      return;
+    }
+    await HapticFeedback.mediumImpact();
+    final freed = formatBytes(summary.freedBytes);
+    // One or many, told apart in Dart: gen-l10n cannot substitute the "#" of a
+    // plural in a message that also takes another placeholder.
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          summary.removed == 1
+              ? l10n.uninstallSummaryOne(freed)
+              : l10n.uninstallSummaryMany(freed, summary.removed),
         ),
       ),
     );
@@ -861,127 +983,6 @@ class _HomeScreenState extends State<HomeScreen>
           ),
         );
       },
-    );
-  }
-
-  /// Asks once, then reports each system dialog as it comes.
-  ///
-  /// The dialog stays open and refills itself while the run is going: the user
-  /// has to answer one confirmation per app, so it is the only place that can
-  /// say how many are left (docs/12 P0-3).
-  Future<void> _confirmUninstallSelected() async {
-    final l10n = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final count = _apps.selected.length;
-    // A dialog on a tablet, the full-width sheet Material uses on a phone.
-    final summary = await showAdaptiveDialog<UninstallSummary>(
-      context: context,
-      // Tapping out mid-run would leave the remaining dialogs unexplained.
-      barrierDismissible: false,
-      builder: (dialogContext) => AnimatedBuilder(
-        animation: _apps,
-        builder: (context, _) {
-          final progress = _apps.uninstallProgress;
-          final running = progress != null;
-          return AlertDialog(
-            title: Text(
-              count == 1 ? l10n.uninstallOne : l10n.uninstallMany(count),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${l10n.appsAndSize(count, formatBytes(_apps.selectedSize))}\n'
-                  '${l10n.uninstallConfirmBody}',
-                ),
-                if (count > _confirmFatigueCount) ...[
-                  // Better said here than discovered at the ninth dialog.
-                  const SizedBox(height: 12),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(
-                        Icons.warning_amber_rounded,
-                        size: 18,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          l10n.uninstallManyWarning(count),
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-                if (running) ...[
-                  const SizedBox(height: 20),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: progress.total == 0
-                          ? null
-                          : progress.done / progress.total,
-                      minHeight: 4,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.uninstallingProgress(
-                      progress.done + 1,
-                      progress.total,
-                    ),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ],
-            ),
-            actions: [
-              if (!running)
-                TextButton(
-                  onPressed: () => Navigator.pop(dialogContext),
-                  child: Text(l10n.cancel),
-                ),
-              FilledButton(
-                onPressed: running
-                    ? null
-                    : () async {
-                        final result = await _apps.uninstallSelected();
-                        if (dialogContext.mounted) {
-                          Navigator.pop(dialogContext, result);
-                        }
-                      },
-                child: Text(l10n.uninstall),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-    if (summary == null) return;
-    if (summary.removed == 0) {
-      // Nothing left the device - every dialog was declined. Say so instead of
-      // closing silently.
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.uninstallNothingRemoved)),
-      );
-      return;
-    }
-    await HapticFeedback.mediumImpact();
-    // One or many, told apart in Dart: gen-l10n cannot substitute the "#" of a
-    // plural in a message that also takes another placeholder, so the two forms
-    // cannot share one ICU plural here.
-    final freed = formatBytes(summary.freedBytes);
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          summary.removed == 1
-              ? l10n.uninstallSummaryOne(freed)
-              : l10n.uninstallSummaryMany(freed, summary.removed),
-        ),
-      ),
     );
   }
 
