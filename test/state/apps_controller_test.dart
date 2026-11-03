@@ -331,6 +331,21 @@ void main() {
     expect(controller.selectedSize, 0);
   });
 
+  test('a settled list is reused until a list input actually changes', () async {
+    await controller.load();
+    final first = controller.appsFor(system: false);
+
+    // Two tab counts, select-all and the visible list all ask in one build.
+    expect(identical(first, controller.appsFor(system: false)), isTrue);
+    // A selection tap repaints the screen; it must not re-sort 200 apps.
+    controller.toggleSelected('com.example.maps');
+    expect(identical(first, controller.appsFor(system: false)), isTrue);
+
+    controller.setQuery('map');
+    expect(identical(first, controller.appsFor(system: false)), isFalse);
+    expect(controller.appsFor(system: false).length, 1);
+  });
+
   test('selection drops packages that are gone after a reload', () async {
     await controller.load();
     controller.toggleSelected('com.example.games');

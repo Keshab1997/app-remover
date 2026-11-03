@@ -10,6 +10,17 @@ import '../services/settings.dart';
 /// only `AppLocalizations` knows which language to say them in (docs/10).
 enum AppLoadFailure { listUnavailable }
 
+/// An installed app plus the primitive keys the list needs: a lower-cased name
+/// for sorting, a lower-cased label/package pair for searching, and the newest
+/// install/update stamp as an int instead of two `DateTime` objects.
+typedef _AppRow =
+    ({
+      AppInfo app,
+      String name,
+      int date,
+      String search,
+    });
+
 class AppsController extends ChangeNotifier {
   AppsController({DateTime Function()? clock})
     : _clock = clock ?? DateTime.now {
@@ -19,12 +30,26 @@ class AppsController extends ChangeNotifier {
   StreamSubscription<String>? _subscription;
 
   List<AppInfo> _all = [];
+  /// One row per installed app with its sort/search keys already computed.
+  /// `appsFor` used to call `toLowerCase()` and build two `DateTime`s *inside*
+  /// the sort comparator, so a 200-app list allocated thousands of objects on
+  /// every rebuild. The keys are made once, when the device list arrives.
+  List<_AppRow> _rows = const [];
   bool _loading = true;
   AppLoadFailure? _failure;
   String _query = '';
   final DateTime Function() _clock;
   AppFilter? _filter;
   bool _usageAvailable = false;
+
+  /// Bumped only by the inputs `appsFor` reads. Selection taps, tab swipes and
+  /// RAM refreshes repaint the screen but must never re-sort the whole list.
+  int _revision = 0;
+  int _builtRevision = -1;
+  List<AppInfo>? _userApps;
+  List<AppInfo>? _systemApps;
+
+  void _listsChanged() => _revision++;
   // Largest first: the list exists so the user can find what to remove, and
   // size is the ordering that answers that. Both are restored from the store,
   // so a person who sorts differently once keeps it (docs/12 P1-6).
@@ -59,36 +84,52 @@ class AppsController extends ChangeNotifier {
     // Tapping the chip that is already on turns it off: a filter with no way
     // out is a trap on a 200-row list.
     _filter = _filter == value ? null : value;
+    _listsChanged();
     notifyListeners();
   }
 
   void clearFilters() {
     if (_filter == null) return;
     _filter = null;
+    _listsChanged();
     notifyListeners();
   }
 
+  /// Both tabs, filtered and sorted, computed together once per state change.
+  /// The home screen asks for `appsFor` four times per build (two tab counts,
+  /// the select-all size and the visible list); this makes the other three
+  /// answers free instead of three more full sorts.
   List<AppInfo> appsFor({required bool system}) {
+    if (_builtRevision != _revision) _buildLists();
+    return system ? _systemApps! : _userApps!;
+  }
+
+  void _buildLists() {
+    final needle = _query.toLowerCase();
     final filter = _filter;
     final now = _clock();
-    final filtered = _all.where(
-      (app) =>
-          app.isSystem == system &&
-          app.matches(_query) &&
-          (filter == null || filter.matches(app, now: now)),
-    );
-    final list = filtered.toList();
-    list.sort((a, b) {
+    final user = <_AppRow>[];
+    final systemRows = <_AppRow>[];
+    for (final row in _rows) {
+      if (!row.search.contains(needle)) continue;
+      if (filter != null && !filter.matches(row.app, now: now)) continue;
+      (row.app.isSystem ? systemRows : user).add(row);
+    }
+
+    int compare(_AppRow a, _AppRow b) {
       final int result = switch (_sortField) {
-        SortField.name => a.label.toLowerCase().compareTo(
-          b.label.toLowerCase(),
-        ),
-        SortField.date => a.changedAt.compareTo(b.changedAt),
-        SortField.size => a.sizeBytes.compareTo(b.sizeBytes),
+        SortField.name => a.name.compareTo(b.name),
+        SortField.date => a.date.compareTo(b.date),
+        SortField.size => a.app.sizeBytes.compareTo(b.app.sizeBytes),
       };
       return _ascending ? result : -result;
-    });
-    return list;
+    }
+
+    user.sort(compare);
+    systemRows.sort(compare);
+    _userApps = user.map((row) => row.app).toList(growable: false);
+    _systemApps = systemRows.map((row) => row.app).toList(growable: false);
+    _builtRevision = _revision;
   }
 
   /// Which tab the user is looking at, kept here so that the widgets around
@@ -117,19 +158,46 @@ class AppsController extends ChangeNotifier {
     _failure = null;
     notifyListeners();
     try {
-      final apps = await NativeApps.listApps();
+      // Three independent channel reads. They used to run one after another,
+      // so the two informational round trips sat on the critical path of the
+      // first frame for no reason. `Future.wait` also handles the case where
+      // more than one of them fails.
+      final results = await Future.wait<dynamic>([
+        NativeApps.listApps(),
+        _hasUsageAccess(),
+        NativeApps.freeMemory(),
+      ]);
+      final apps = results[0] as List<AppInfo>;
       _all = apps;
-      _usageAvailable = await _hasUsageAccess();
+      _rows = apps
+          .map(
+            (app) => (
+              app: app,
+              name: app.label.toLowerCase(),
+              // Same answer as AppInfo.changedAt, without four DateTime
+              // allocations per comparison.
+              date: app.lastUpdateTime > app.firstInstallTime
+                  ? app.lastUpdateTime
+                  : app.firstInstallTime,
+              search:
+                  '${app.label.toLowerCase()}\n${app.packageName.toLowerCase()}',
+            ),
+          )
+          .toList(growable: false);
+      _usageAvailable = results[1] as bool;
+      _setMemory(results[2] as ({int available, int total}));
       // Access revoked since the chip was tapped must not leave the list
       // looking empty for a reason the user cannot act on.
       if (!_usageAvailable && _filter == AppFilter.unused) _filter = null;
       _selected.removeWhere(
         (pkg) => !_all.any((app) => app.packageName == pkg),
       );
-      await refreshMemory();
+      _listsChanged();
     } catch (e) {
       _failure = AppLoadFailure.listUnavailable;
       _all = [];
+      _rows = const [];
+      _listsChanged();
     } finally {
       _loading = false;
       notifyListeners();
@@ -146,11 +214,14 @@ class AppsController extends ChangeNotifier {
     }
   }
 
+  void _setMemory(({int available, int total}) memory) {
+    _freeRam = memory.available;
+    _totalRam = memory.total;
+  }
+
   Future<void> refreshMemory() async {
     try {
-      final memory = await NativeApps.freeMemory();
-      _freeRam = memory.available;
-      _totalRam = memory.total;
+      _setMemory(await NativeApps.freeMemory());
       notifyListeners();
     } catch (_) {
       // Ignore: memory readout is informational only.
@@ -160,18 +231,21 @@ class AppsController extends ChangeNotifier {
   void setQuery(String value) {
     if (_query == value) return;
     _query = value;
+    _listsChanged();
     notifyListeners();
   }
 
   void setSort(SortField field, {bool? ascending}) {
     _sortField = field;
     if (ascending != null) _ascending = ascending;
+    _listsChanged();
     notifyListeners();
     _rememberSort();
   }
 
   void toggleSortOrder() {
     _ascending = !_ascending;
+    _listsChanged();
     notifyListeners();
     _rememberSort();
   }

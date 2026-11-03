@@ -278,10 +278,18 @@ class AppIcon extends StatelessWidget {
   Widget _content(BuildContext context) {
     final bytes = icon;
     if (bytes == null || bytes.isEmpty) return _fallback();
+    // The channel sends 144 px PNGs but the tile draws 48 px. Decoding at the
+    // displayed resolution (times the screen's density) drops each icon from
+    // ~144² to ~(48·dpr)² pixels — nine times less work and memory on a 1x
+    // screen, on every visible row of every scroll.
+    final pixels = (48 * (MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0))
+        .round();
     final image = Image.memory(
       bytes,
       width: 48,
       height: 48,
+      cacheWidth: pixels,
+      cacheHeight: pixels,
       fit: BoxFit.cover,
       gaplessPlayback: true,
       errorBuilder: (_, _, _) => _fallback(),
