@@ -116,7 +116,7 @@ usage access তো P0-2 দিয়েই চাইছ; সেই `PACKAGE_USA
 
 এটাই user-কে "কোনটা মুছব?" প্রশ্নের উত্তর দেয় — uninstaller apps-এর
 reviews-এ এই প্রশ্নটাই সবচেয়ে বেশি ওঠে। Kotlin-এ
-`UsageStatsManager.queryUsageStats(INTERVAL_YEAR, …)` একবার cache করে
+`UsageStatsManager.queryUsageStats(INTERVAL_BEST, …)` একবার cache করে
 `loadApps()`-এর সাথে পাঠালেই হবে (executor-এ, main thread-এ নয়), আর permission
 না থাকলে chip গুলো hide।
 

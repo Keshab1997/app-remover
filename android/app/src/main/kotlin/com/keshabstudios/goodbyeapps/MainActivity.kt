@@ -279,8 +279,12 @@ class MainActivity : FlutterActivity() {
             val end = System.currentTimeMillis()
             val begin = end - 365L * 24 * 60 * 60 * 1000
             val out = HashMap<String, Long>()
+            // INTERVAL_BEST, not a yearly bucket: what we need from each
+            // package is lastTimeUsed, and the platform gives the finest
+            // granularity it is willing to serve for this window - twelve
+            // monthly rows for a year, instead of one stale yearly row.
             val stats: List<UsageStats>? =
-                manager.queryUsageStats(UsageStatsManager.INTERVAL_YEAR, begin, end)
+                manager.queryUsageStats(UsageStatsManager.INTERVAL_BEST, begin, end)
             stats?.forEach { stat ->
                 val pkg = stat.packageName ?: return@forEach
                 val last = stat.lastTimeUsed
