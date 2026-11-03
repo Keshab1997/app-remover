@@ -514,7 +514,9 @@ void main() {
     expect(find.text('Copy package name'), findsNothing);
   });
 
-  testWidgets('a batch confirms in the bar instead of another dialog', (tester) async {
+  testWidgets('a batch confirms in the bar instead of another dialog', (
+    tester,
+  ) async {
     rows = [
       for (var i = 0; i < 30; i++)
         {
@@ -552,7 +554,9 @@ void main() {
     );
   });
 
-  testWidgets('one app costs one tap and one popup: the system one', (tester) async {
+  testWidgets('one app costs one tap and one popup: the system one', (
+    tester,
+  ) async {
     rows = [
       {
         'packageName': 'com.example.maps',
