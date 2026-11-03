@@ -6,8 +6,15 @@ arrow leaving to the right — on solid #3D5AFE. No gradient (it turns to mud at
 Play's small sizes), no lettering (illegible in a 48px launcher tile), and no
 resemblance to any other uninstaller.
 
-    python3 tool/make_icons.py            # write every asset
+    python3 tool/make_icons.py            # re-cut every size from the 3D master
+    python3 tool/make_icons.py --flat      # the original two-colour geometric mark
     python3 tool/make_icons.py --check     # report sizes without writing
+
+The shipped launcher icon is a 3D render: assets/branding/icon-3d-master.png
+is the single 1024x1024 master and is committed with the app. When it exists,
+the default run cuts it into every mipmap / adaptive foreground / Play / PWA
+slot instead of drawing the flat glyph. `icon_mono.png` stays flat, because
+Android 13 themed icons need a one-colour silhouette.
 
 The geometry lives in `glyph()` only: the SVG master and every PNG are drawn
 from it, so the two can never drift apart.
@@ -33,6 +40,7 @@ from PIL import Image, ImageChops, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parent.parent
 RES = ROOT / "android/app/src/main/res"
 BRANDING = ROOT / "assets/branding"
+MASTER_3D = BRANDING / "icon-3d-master.png"
 
 BLUE = (0x3D, 0x5A, 0xFE, 255)  # theme seed, lib/main.dart
 DARK = (0x1A, 0x23, 0x7E, 255)  # docs/01 brand table
@@ -237,7 +245,7 @@ def adaptive_xml(path: Path) -> None:
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/ic_launcher_background"/>
     <foreground android:drawable="@drawable/ic_launcher_foreground"/>
-    <monochrome android:drawable="@drawable/ic_launcher_foreground"/>
+    <monochrome android:drawable="@drawable/ic_launcher_mono"/>
 </adaptive-icon>
 """)
 
@@ -261,46 +269,119 @@ def web_shell(colors: dict) -> None:
     (web / "manifest.json").write_text(manifest)
 
 
+def master_image(size: int, foreground: bool = False) -> Image.Image:
+    """Re-cut the 3D master for one launcher / web slot.
+
+    Legacy launcher icons, the Play icon and the PWA icons are full-bleed.
+    Adaptive foregrounds need a transparent canvas with the mark scaled into
+    the 72/108 dp safe zone, or Android's circular mask crops the artwork.
+    """
+    with Image.open(MASTER_3D) as src:
+        side = min(src.size)
+        left, top = (src.width - side) // 2, (src.height - side) // 2
+        square = src.crop((left, top, left + side, top + side)).convert("RGBA")
+    full = square.resize((size, size), Image.LANCZOS)
+    if not foreground:
+        return full
+    inner = round(size * GLYPH_RATIO)
+    canvas = Image.new("RGBA", (size, size), TRANSPARENT)
+    canvas.alpha_composite(
+        full.resize((inner, inner), Image.LANCZOS),
+        ((size - inner) // 2, (size - inner) // 2),
+    )
+    return canvas
+
+
+def apply_3d_master() -> None:
+    """The shipped 3D icon, cut once into every size the project ships."""
+
+    def put(path: Path, image: Image.Image, *, rgb: bool = False) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        (image.convert("RGB") if rgb else image).save(path)
+
+    put(BRANDING / "icon.png", master_image(1024))
+    put(BRANDING / "icon_fg.png", master_image(1024, foreground=True))
+    put(BRANDING / "play-icon-512.png", master_image(512), rgb=True)
+    for bucket, size in LEGACY_SIZES.items():
+        icon = master_image(size)
+        for stem in ("ic_launcher", "ic_launcher_round"):
+            put(RES / f"mipmap-{bucket}" / f"{stem}.png", icon)
+    for bucket, size in FOREGROUND_SIZES.items():
+        put(
+            RES / f"drawable-{bucket}" / "ic_launcher_foreground.png",
+            master_image(size, foreground=True),
+        )
+    for name, size in (
+        ("icons/Icon-192.png", 192),
+        ("icons/Icon-512.png", 512),
+        ("icons/Icon-maskable-192.png", 192),
+        ("icons/Icon-maskable-512.png", 512),
+        ("favicon.png", 64),
+    ):
+        put(ROOT / "web" / name, master_image(size), rgb=True)
+
+
+def shared_shell() -> None:
+    """Layers both icon families need: adaptive XML, flat mono glyph, colours."""
+    (RES / "mipmap-anydpi-v26").mkdir(parents=True, exist_ok=True)
+    for name in ("ic_launcher.xml", "ic_launcher_round.xml"):
+        adaptive_xml(RES / "mipmap-anydpi-v26" / name)
+    (RES / "values" / "colors.xml").write_text(
+        """<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- docs/01 brand table; keep in step with the seed in lib/main.dart. -->
+    <color name="ic_launcher_background">#3D5AFE</color>
+</resources>
+"""
+    )
+    # Android 13 tints this flat silhouette; a 3D render would tint to a blob.
+    for bucket, size in FOREGROUND_SIZES.items():
+        d = RES / f"drawable-{bucket}"
+        d.mkdir(parents=True, exist_ok=True)
+        render(size, WHITE).save(d / "ic_launcher_mono.png")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--check", action="store_true", help="report, do not write")
+    ap.add_argument(
+        "--flat", action="store_true",
+        help="regenerate the original two-colour geometric icon instead",
+    )
     args = ap.parse_args()
 
     BRANDING.mkdir(parents=True, exist_ok=True)
     sizes = []
 
-    full = render(1024, WHITE, background="tile")
-    fg = render(1024, WHITE)
-    mono = render(1024, WHITE)
-    play = full.resize((512, 512), Image.LANCZOS).convert("RGB")  # alpha-free
-
+    use_master = MASTER_3D.exists() and not args.flat
     if not args.check:
-        svg_master(BRANDING / "icon.svg")
-        full.save(BRANDING / "icon.png")
-        fg.save(BRANDING / "icon_fg.png")
-        mono.save(BRANDING / "icon_mono.png")
-        play.save(BRANDING / "play-icon-512.png")
-        feature_graphic(BRANDING / "feature-graphic.png")
+        if use_master:
+            print("source: assets/branding/icon-3d-master.png (3D master)")
+            apply_3d_master()
+        else:
+            print("source: flat geometry in glyph()")
+            full = render(1024, WHITE, background="tile")
+            fg = render(1024, WHITE)
+            mono = render(1024, WHITE)
+            play = full.resize((512, 512), Image.LANCZOS).convert("RGB")  # alpha-free
 
-        (RES / "mipmap-anydpi-v26").mkdir(parents=True, exist_ok=True)
-        for name in ("ic_launcher.xml", "ic_launcher_round.xml"):
-            adaptive_xml(RES / "mipmap-anydpi-v26" / name)
-        (RES / "values" / "colors.xml").write_text(
-            """<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- docs/01 brand table; keep in step with the seed in lib/main.dart. -->
-    <color name="ic_launcher_background">#3D5AFE</color>
-</resources>
-""")
-        for bucket, size in LEGACY_SIZES.items():
-            out = render(size, WHITE, background="tile")
-            for stem in ("ic_launcher", "ic_launcher_round"):
-                out.save(RES / f"mipmap-{bucket}" / f"{stem}.png")
-        for bucket, size in FOREGROUND_SIZES.items():
-            d = RES / f"drawable-{bucket}"
-            d.mkdir(parents=True, exist_ok=True)
-            render(size, WHITE).save(d / "ic_launcher_foreground.png")
-        web_shell({"background_color": "#3D5AFE", "theme_color": "#3D5AFE"})
+            svg_master(BRANDING / "icon.svg")
+            full.save(BRANDING / "icon.png")
+            fg.save(BRANDING / "icon_fg.png")
+            mono.save(BRANDING / "icon_mono.png")
+            play.save(BRANDING / "play-icon-512.png")
+            feature_graphic(BRANDING / "feature-graphic.png")
+
+            for bucket, size in LEGACY_SIZES.items():
+                out = render(size, WHITE, background="tile")
+                for stem in ("ic_launcher", "ic_launcher_round"):
+                    out.save(RES / f"mipmap-{bucket}" / f"{stem}.png")
+            for bucket, size in FOREGROUND_SIZES.items():
+                d = RES / f"drawable-{bucket}"
+                d.mkdir(parents=True, exist_ok=True)
+                render(size, WHITE).save(d / "ic_launcher_foreground.png")
+            web_shell({"background_color": "#3D5AFE", "theme_color": "#3D5AFE"})
+        shared_shell()
 
     written = sorted(
         x

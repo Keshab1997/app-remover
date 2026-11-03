@@ -29,6 +29,18 @@ Rules:
 - কোনো text, letter, "G" নেই — 48px-এ পড়া যায় না
 - অন্য app-এর icon-এর সাথে মিল নেই (Splend Apps-এর icon কপি করা যাবে না)
 
+### Shipped 3D icon (2026-11)
+
+Launcher icon এখন 3D render। `assets/branding/icon-3d-master.png` ই একমাত্র
+1024×1024 master — `python3 tool/make_icons.py` চালালে সব mipmap, adaptive
+foreground, Play icon, web icon আর favicon এই master থেকেই কাটা হয়।
+`--flat` দিলে আগের দু-রঙা geometric mark ফিরে আসে। Android 13-এর themed
+icon-এর জন্য `ic_launcher_mono.png` flat white সিলুয়েটই থাকে।
+
+উপরের "gradient নয় / ২ রঙ" rule-টা ঐ legacy flat mark-এর জন্য; 3D master-এ
+soft lighting আর mint glow ইচ্ছে করেই রাখা হয়েছে — ছোট সাইজে glyph-টা (সাদা
+bin + arrow) পরিষ্কার থাকে, আর background-এর gradient শুধু depth দেয়।
+
 Design tool-এ যা যা লাগবে: `icon-source.svg` (1024×1024), `icon-foreground.svg` (432×432,
 safe zone 264×264), `icon-mono.svg` (single color, transparent background)।
 
