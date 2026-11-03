@@ -372,56 +372,131 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
+  /// RAM is the one number on this screen that changes without the user asking,
+  /// so the whole bar is the control. It used to carry a second refresh icon -
+  /// 18 px wide, next to a 44 px row, and doing what the app bar already did -
+  /// while the bar itself ignored taps (docs/12 P1-10).
   Widget _memoryBar() {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
     final scheme = theme.colorScheme;
     final used = _apps.totalRam - _apps.freeRam;
+    final fraction = _apps.totalRam > 0 ? used / _apps.totalRam : 0.0;
+    final small = theme.textTheme.bodySmall?.copyWith(
+      color: scheme.onSurfaceVariant,
+    );
     return SafeArea(
-      child: Container(
-        height: 44,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(color: scheme.outlineVariant, width: 0.6),
+      top: false,
+      child: Material(
+        color: scheme.surfaceContainer,
+        child: InkWell(
+          onTap: _showMemorySheet,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                height: 42,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(color: scheme.outlineVariant, width: 0.6),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.memory,
+                      size: 16,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(l10n.freeMemory, style: small),
+                    const SizedBox(width: 6),
+                    Text(
+                      formatBytes(_apps.freeRam),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (_apps.totalRam > 0)
+                      Text(
+                        l10n.usedOfTotal(
+                          formatBytes(used),
+                          formatBytes(_apps.totalRam),
+                        ),
+                        style: small,
+                      ),
+                    const SizedBox(width: 6),
+                    Icon(
+                      Icons.chevron_right,
+                      size: 18,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ],
+                ),
+              ),
+              // How full the RAM is, at a glance, without reading the numbers.
+              SizedBox(
+                height: 2,
+                child: LinearProgressIndicator(
+                  value: fraction,
+                  minHeight: 2,
+                  color: fraction > 0.9 ? scheme.error : scheme.primary,
+                  backgroundColor: scheme.surfaceContainerHighest,
+                ),
+              ),
+            ],
           ),
         ),
-        child: Row(
-          children: [
-            Icon(Icons.memory, size: 16, color: scheme.onSurfaceVariant),
-            const SizedBox(width: 8),
-            Text(
-              l10n.freeMemory,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              formatBytes(_apps.freeRam),
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const Spacer(),
-            if (_apps.totalRam > 0)
-              Text(
-                l10n.usedOfTotal(
-                  formatBytes(used),
-                  formatBytes(_apps.totalRam),
-                ),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
+      ),
+    );
+  }
+
+  Future<void> _showMemorySheet() async {
+    final l10n = AppLocalizations.of(context);
+    final used = _apps.totalRam - _apps.freeRam;
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: Text(
+                  l10n.deviceMemory,
+                  style: Theme.of(sheetContext).textTheme.titleMedium,
                 ),
               ),
-            IconButton(
-              visualDensity: VisualDensity.compact,
-              iconSize: 18,
-              icon: const Icon(Icons.refresh),
-              tooltip: l10n.refreshMemory,
-              onPressed: _apps.refreshMemory,
-            ),
-          ],
+              ListTile(
+                leading: const Icon(Icons.bolt_outlined),
+                title: Text(l10n.freeMemory),
+                trailing: Text(formatBytes(_apps.freeRam)),
+              ),
+              ListTile(
+                leading: const Icon(Icons.data_usage),
+                title: Text(l10n.memoryUsed),
+                trailing: Text(formatBytes(used)),
+              ),
+              ListTile(
+                leading: const Icon(Icons.sd_storage),
+                title: Text(l10n.memoryTotal),
+                trailing: Text(formatBytes(_apps.totalRam)),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: FilledButton.tonal(
+                  onPressed: () {
+                    Navigator.pop(sheetContext);
+                    _apps.refreshMemory();
+                  },
+                  child: Text(l10n.refreshMemory),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -436,35 +511,39 @@ class _HomeScreenState extends State<HomeScreen>
       showDragHandle: true,
       builder: (sheetContext) => StatefulBuilder(
         builder: (context, setSheetState) => SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final field in SortField.values)
-                ListTile(
-                  title: Text(switch (field) {
-                    SortField.name => l10n.sortByName,
-                    SortField.date => l10n.sortByDate,
-                    SortField.size => l10n.sortBySize,
-                  }),
-                  trailing: _apps.sortField == field
-                      ? const Icon(Icons.check, size: 20)
-                      : null,
-                  onTap: () {
-                    _apps.setSort(field);
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final field in SortField.values)
+                  ListTile(
+                    title: Text(switch (field) {
+                      SortField.name => l10n.sortByName,
+                      SortField.date => l10n.sortByDate,
+                      SortField.size => l10n.sortBySize,
+                    }),
+                    trailing: _apps.sortField == field
+                        ? const Icon(Icons.check, size: 20)
+                        : null,
+                    onTap: () {
+                      _apps.setSort(field);
+                      setSheetState(() {});
+                    },
+                  ),
+                const Divider(height: 1),
+                SwitchListTile(
+                  title: Text(
+                    _apps.ascending ? l10n.ascending : l10n.descending,
+                  ),
+                  subtitle: Text(l10n.toggleSortDirection),
+                  value: _apps.ascending,
+                  onChanged: (_) {
+                    _apps.toggleSortOrder();
                     setSheetState(() {});
                   },
                 ),
-              const Divider(height: 1),
-              SwitchListTile(
-                title: Text(_apps.ascending ? l10n.ascending : l10n.descending),
-                subtitle: Text(l10n.toggleSortDirection),
-                value: _apps.ascending,
-                onChanged: (_) {
-                  _apps.toggleSortOrder();
-                  setSheetState(() {});
-                },
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -482,87 +561,91 @@ class _HomeScreenState extends State<HomeScreen>
       showDragHandle: true,
       builder: (sheetContext) {
         return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: LazyAppIcon(
-                  packageName: app.packageName,
-                  scheme: scheme,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: LazyAppIcon(
+                    packageName: app.packageName,
+                    scheme: scheme,
+                  ),
+                  title: Text(app.label),
+                  subtitle: Text(
+                    '${app.packageName}\n'
+                    '${l10n.versionAndSize(app.versionName, formatBytes(app.sizeBytes))}',
+                  ),
+                  isThreeLine: true,
                 ),
-                title: Text(app.label),
-                subtitle: Text(
-                  '${app.packageName}\n'
-                  '${l10n.versionAndSize(app.versionName, formatBytes(app.sizeBytes))}',
+                const Divider(height: 1),
+                _SizeBreakdown(packageName: app.packageName),
+                ListTile(
+                  leading: const Icon(Icons.launch),
+                  title: Text(l10n.open),
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    NativeApps.launch(app.packageName);
+                  },
                 ),
-                isThreeLine: true,
-              ),
-              const Divider(height: 1),
-              _SizeBreakdown(packageName: app.packageName),
-              ListTile(
-                leading: const Icon(Icons.launch),
-                title: Text(l10n.open),
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  NativeApps.launch(app.packageName);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.info_outline),
-                title: Text(l10n.appInfo),
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  NativeApps.openAppInfo(app.packageName);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.storefront_outlined),
-                title: Text(l10n.searchInPlay),
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  NativeApps.openPlayStore(app.packageName);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.add_to_home_screen_outlined),
-                title: Text(l10n.addToHomeScreen),
-                onTap: () async {
-                  Navigator.pop(sheetContext);
-                  final ok = await NativeApps.addShortcut(app.packageName);
-                  // `context` is the State's own, so the State's mounted flag
-                  // is the guard the analyzer (and reality) wants.
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      // false covers both "launcher cannot pin" and "this app
-                      // has no launch intent", which the user cannot act on.
-                      content: Text(
-                        ok ? l10n.shortcutRequested : l10n.shortcutUnsupported,
+                ListTile(
+                  leading: const Icon(Icons.info_outline),
+                  title: Text(l10n.appInfo),
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    NativeApps.openAppInfo(app.packageName);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.storefront_outlined),
+                  title: Text(l10n.searchInPlay),
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    NativeApps.openPlayStore(app.packageName);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.add_to_home_screen_outlined),
+                  title: Text(l10n.addToHomeScreen),
+                  onTap: () async {
+                    Navigator.pop(sheetContext);
+                    final ok = await NativeApps.addShortcut(app.packageName);
+                    // `context` is the State's own, so the State's mounted flag
+                    // is the guard the analyzer (and reality) wants.
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        // false covers both "launcher cannot pin" and "this app
+                        // has no launch intent", which the user cannot act on.
+                        content: Text(
+                          ok
+                              ? l10n.shortcutRequested
+                              : l10n.shortcutUnsupported,
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
-              ListTile(
-                enabled: !app.isSystem,
-                leading: Icon(
-                  Icons.delete_outline,
-                  color: app.isSystem ? null : scheme.error,
+                    );
+                  },
                 ),
-                title: Text(
-                  app.isSystem ? l10n.systemAppsProtected : l10n.uninstall,
-                  style: app.isSystem ? null : TextStyle(color: scheme.error),
+                ListTile(
+                  enabled: !app.isSystem,
+                  leading: Icon(
+                    Icons.delete_outline,
+                    color: app.isSystem ? null : scheme.error,
+                  ),
+                  title: Text(
+                    app.isSystem ? l10n.systemAppsProtected : l10n.uninstall,
+                    style: app.isSystem ? null : TextStyle(color: scheme.error),
+                  ),
+                  onTap: app.isSystem
+                      ? null
+                      : () async {
+                          Navigator.pop(sheetContext);
+                          if (await _apps.uninstall(app)) {
+                            await HapticFeedback.mediumImpact();
+                          }
+                        },
                 ),
-                onTap: app.isSystem
-                    ? null
-                    : () async {
-                        Navigator.pop(sheetContext);
-                        if (await _apps.uninstall(app)) {
-                          await HapticFeedback.mediumImpact();
-                        }
-                      },
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

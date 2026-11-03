@@ -619,6 +619,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Freed {size} from {count} apps'**
   String uninstallSummaryMany(String size, int count);
+
+  /// No description provided for @deviceMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Device memory'**
+  String get deviceMemory;
+
+  /// No description provided for @memoryUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Used'**
+  String get memoryUsed;
+
+  /// No description provided for @memoryTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get memoryTotal;
 }
 
 class _AppLocalizationsDelegate

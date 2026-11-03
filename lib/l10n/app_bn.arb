@@ -133,5 +133,8 @@
         "type": "int"
       }
     }
-  }
+  },
+  "deviceMemory": "ডিভাইসের মেমরি",
+  "memoryUsed": "ব্যবহৃত",
+  "memoryTotal": "মোট"
 }

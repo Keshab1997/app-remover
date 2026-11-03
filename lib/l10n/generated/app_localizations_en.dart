@@ -301,4 +301,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String uninstallSummaryMany(String size, int count) {
     return 'Freed $size from $count apps';
   }
+
+  @override
+  String get deviceMemory => 'Device memory';
+
+  @override
+  String get memoryUsed => 'Used';
+
+  @override
+  String get memoryTotal => 'Total';
 }

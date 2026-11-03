@@ -277,6 +277,35 @@ void main() {
     },
   );
 
+  testWidgets('the memory bar opens a sheet instead of a second refresh', (
+    tester,
+  ) async {
+    rows = [
+      {
+        'packageName': 'com.example.maps',
+        'label': 'Maps',
+        'isSystem': false,
+        'sizeBytes': 100,
+        'firstInstallTime': 1,
+        'lastUpdateTime': 1,
+        'versionName': '1.0',
+        'versionCode': 1,
+      },
+    ];
+    await open(tester);
+
+    // The bar used to ship its own 18 px refresh next to the app bar's.
+    expect(find.byIcon(Icons.refresh), findsOneWidget);
+
+    await tester.tap(find.text('Free memory'));
+    await tester.pumpAndSettle();
+    expect(find.text('Device memory'), findsOneWidget);
+    expect(find.text('Used'), findsOneWidget);
+    expect(find.text('Total'), findsOneWidget);
+    // 4000 - 1000 bytes from the mocked ActivityManager.
+    expect(find.text('2.9 KB / 3.9 KB used'), findsOneWidget);
+  });
+
   testWidgets('an empty list is still pull-to-refreshable', (tester) async {
     await open(tester);
 

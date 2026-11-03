@@ -207,5 +207,8 @@
         "type": "int"
       }
     }
-  }
+  },
+  "deviceMemory": "Device memory",
+  "memoryUsed": "Used",
+  "memoryTotal": "Total"
 }

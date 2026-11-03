@@ -302,4 +302,13 @@ class AppLocalizationsBn extends AppLocalizations {
   String uninstallSummaryMany(String size, int count) {
     return '$countটি অ্যাপ মুছে $size জায়গা খালি হয়েছে';
   }
+
+  @override
+  String get deviceMemory => 'ডিভাইসের মেমরি';
+
+  @override
+  String get memoryUsed => 'ব্যবহৃত';
+
+  @override
+  String get memoryTotal => 'মোট';
 }
