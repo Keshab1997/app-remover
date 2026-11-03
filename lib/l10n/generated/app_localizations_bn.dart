@@ -248,4 +248,23 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get noThanks => 'লাগবে না';
+
+  @override
+  String uninstallSummary(String size, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '#টি অ্যাপ',
+      one: 'একটি অ্যাপ',
+    );
+    return '$_temp0 মুছে $size জায়গা খালি হয়েছে';
+  }
+
+  @override
+  String uninstallingProgress(int done, int total) {
+    return '$totalটির মধ্যে $doneটি সরানো হচ্ছে';
+  }
+
+  @override
+  String get uninstallNothingRemoved => 'কোনো অ্যাপ সরানো হয়নি';
 }

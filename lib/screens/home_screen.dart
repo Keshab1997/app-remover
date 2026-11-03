@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../l10n/generated/app_localizations.dart';
 import '../models/app_info.dart';
@@ -455,7 +456,9 @@ class _HomeScreenState extends State<HomeScreen>
                     ? null
                     : () async {
                         Navigator.pop(sheetContext);
-                        await _apps.uninstall(app);
+                        if (await _apps.uninstall(app)) {
+                          await HapticFeedback.mediumImpact();
+                        }
                       },
               ),
             ],
@@ -465,32 +468,100 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
+  /// Asks once, then reports each system dialog as it comes.
+  ///
+  /// The dialog stays open and refills itself while the run is going: the user
+  /// has to answer one confirmation per app, so it is the only place that can
+  /// say how many are left (docs/12 P0-3).
   Future<void> _confirmUninstallSelected() async {
     final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
     final count = _apps.selected.length;
-    final confirmed = await showDialog<bool>(
+    final summary = await showDialog<UninstallSummary>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(count == 1 ? l10n.uninstallOne : l10n.uninstallMany(count)),
-        content: Text(
-          '${l10n.appsAndSize(count, formatBytes(_apps.selectedSize))}\n'
-          '${l10n.uninstallConfirmBody}',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(l10n.uninstall),
-          ),
-        ],
+      // Tapping out mid-run would leave the remaining dialogs unexplained.
+      barrierDismissible: false,
+      builder: (dialogContext) => AnimatedBuilder(
+        animation: _apps,
+        builder: (context, _) {
+          final progress = _apps.uninstallProgress;
+          final running = progress != null;
+          return AlertDialog(
+            title: Text(
+              count == 1 ? l10n.uninstallOne : l10n.uninstallMany(count),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${l10n.appsAndSize(count, formatBytes(_apps.selectedSize))}\n'
+                  '${l10n.uninstallConfirmBody}',
+                ),
+                if (running) ...[
+                  const SizedBox(height: 20),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: progress.total == 0
+                          ? null
+                          : progress.done / progress.total,
+                      minHeight: 4,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.uninstallingProgress(
+                      progress.done + 1,
+                      progress.total,
+                    ),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ],
+            ),
+            actions: [
+              if (!running)
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: Text(l10n.cancel),
+                ),
+              FilledButton(
+                onPressed: running
+                    ? null
+                    : () async {
+                        final result = await _apps.uninstallSelected();
+                        if (dialogContext.mounted) {
+                          Navigator.pop(dialogContext, result);
+                        }
+                      },
+                child: Text(l10n.uninstall),
+              ),
+            ],
+          );
+        },
       ),
     );
-    if (confirmed == true) {
-      await _apps.uninstallSelected();
+    if (summary == null) return;
+    if (summary.removed == 0) {
+      // Nothing left the device - every dialog was declined. Say so instead of
+      // closing silently.
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.uninstallNothingRemoved)),
+      );
+      return;
     }
+    await HapticFeedback.mediumImpact();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          l10n.uninstallSummary(
+            formatBytes(summary.freedBytes),
+            summary.removed,
+          ),
+        ),
+      ),
+    );
   }
 
   void _openSettings() {

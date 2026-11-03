@@ -127,15 +127,62 @@ class AppsController extends ChangeNotifier {
 
   Future<bool> uninstall(AppInfo app) => NativeApps.uninstall(app.packageName);
 
-  Future<void> uninstallSelected() async {
-    final targets = _all.where((app) => _selected.contains(app.packageName));
-    for (final app in targets.toList()) {
-      await NativeApps.uninstall(app.packageName);
-      // The system shows one confirmation dialog at a time; give it a moment.
-      await Future<void>.delayed(const Duration(milliseconds: 600));
+  bool _uninstalling = false;
+  UninstallProgress? _progress;
+
+  /// True while a bulk uninstall is waiting on system dialogs.
+  bool get uninstalling => _uninstalling;
+
+  /// Which package the run is on, or `null` when none is running.
+  UninstallProgress? get uninstallProgress => _progress;
+
+  /// Removes every selected package and reports what the run achieved.
+  ///
+  /// A bulk uninstall is the one place where the user commits to several
+  /// system dialogs in a row, so the run says which one is in front of them
+  /// and, at the end, how much space it actually bought (docs/12 P0-3).
+  /// Returns `null` when there was nothing to do.
+  Future<UninstallSummary?> uninstallSelected() async {
+    if (_uninstalling || _selected.isEmpty) return null;
+    final targets = _all
+        .where((app) => _selected.contains(app.packageName))
+        .toList(growable: false);
+    _uninstalling = true;
+    var done = 0;
+    var failed = 0;
+    var freedBytes = 0;
+    try {
+      for (final app in targets) {
+        _progress = UninstallProgress(
+          done: done,
+          total: targets.length,
+          freedBytes: freedBytes,
+        );
+        notifyListeners();
+        // "Accepted" only means the system dialog was shown, so the reload
+        // afterwards - not this bool - decides what the list looks like.
+        if (await uninstall(app)) {
+          done++;
+          freedBytes += app.sizeBytes;
+        } else {
+          failed++;
+        }
+        // The system shows one confirmation dialog at a time; give it a moment.
+        await Future<void>.delayed(const Duration(milliseconds: 600));
+      }
+      _selected.clear();
+      _progress = null;
+      await load();
+      return UninstallSummary(
+        removed: done,
+        freedBytes: freedBytes,
+        failed: failed,
+      );
+    } finally {
+      _progress = null;
+      _uninstalling = false;
+      notifyListeners();
     }
-    _selected.clear();
-    notifyListeners();
   }
 
   @override
@@ -143,4 +190,31 @@ class AppsController extends ChangeNotifier {
     _subscription?.cancel();
     super.dispose();
   }
+}
+
+/// Which package a bulk uninstall is on right now.
+class UninstallProgress {
+  const UninstallProgress({
+    required this.done,
+    required this.total,
+    required this.freedBytes,
+  });
+
+  final int done;
+  final int total;
+  final int freedBytes;
+}
+
+/// What a finished bulk uninstall achieved. A package the user rejected in the
+/// system dialog counts as `failed`, not as `removed`.
+class UninstallSummary {
+  const UninstallSummary({
+    required this.removed,
+    required this.freedBytes,
+    required this.failed,
+  });
+
+  final int removed;
+  final int freedBytes;
+  final int failed;
 }

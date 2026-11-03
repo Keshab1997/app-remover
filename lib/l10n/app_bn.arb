@@ -72,5 +72,28 @@
   "clearSearch": "সার্চ মুছুন",
   "sizesHintTitle": "সঠিক সাইজের জন্য usage access লাগে",
   "enable": "চালু করুন",
-  "noThanks": "লাগবে না"
+  "noThanks": "লাগবে না",
+  "uninstallSummary": "{count, plural, =1 {একটি অ্যাপ} other {#টি অ্যাপ}} মুছে {size} জায়গা খালি হয়েছে",
+  "@uninstallSummary": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "uninstallingProgress": "{total}টির মধ্যে {done}টি সরানো হচ্ছে",
+  "@uninstallingProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "uninstallNothingRemoved": "কোনো অ্যাপ সরানো হয়নি"
 }

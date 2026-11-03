@@ -146,5 +146,28 @@
   "clearSearch": "Clear search",
   "sizesHintTitle": "Exact sizes need usage access",
   "enable": "Enable",
-  "noThanks": "No thanks"
+  "noThanks": "No thanks",
+  "uninstallSummary": "Freed {size} from {count, plural, =1 {one app} other {# apps}}",
+  "@uninstallSummary": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "uninstallingProgress": "Removing {done} of {total}",
+  "@uninstallingProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "uninstallNothingRemoved": "No apps were removed"
 }

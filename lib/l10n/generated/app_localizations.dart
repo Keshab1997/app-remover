@@ -535,6 +535,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No thanks'**
   String get noThanks;
+
+  /// No description provided for @uninstallSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Freed {size} from {count, plural, =1 {one app} other {# apps}}'**
+  String uninstallSummary(String size, int count);
+
+  /// No description provided for @uninstallingProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Removing {done} of {total}'**
+  String uninstallingProgress(int done, int total);
+
+  /// No description provided for @uninstallNothingRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'No apps were removed'**
+  String get uninstallNothingRemoved;
 }
 
 class _AppLocalizationsDelegate

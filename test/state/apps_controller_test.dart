@@ -115,6 +115,58 @@ void main() {
     expect(controller.loading, isFalse);
   });
 
+  test(
+    'a bulk uninstall walks the selection and counts the space it bought',
+    () async {
+      await controller.load();
+
+      final asked = <String>[];
+      final reported = <int>[];
+      controller.addListener(() {
+        final progress = controller.uninstallProgress;
+        if (progress != null) reported.add(progress.done);
+      });
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            if (call.method == 'listApps') return rows;
+            if (call.method == 'freeMemory') {
+              return const {'available': 1000, 'total': 4000};
+            }
+            if (call.method == 'uninstall') {
+              final package = call.arguments['package'] as String;
+              asked.add(package);
+              // Maps is the one the user declines in the system dialog.
+              return package != 'com.example.maps';
+            }
+            return null;
+          });
+
+      controller
+        ..toggleSelected('com.example.games')
+        ..toggleSelected('com.example.maps');
+
+      final summary = await controller.uninstallSelected();
+
+      expect(asked, ['com.example.games', 'com.example.maps']);
+      // Only the accepted package counts, and only its size is freed.
+      expect(summary?.removed, 1);
+      expect(summary?.freedBytes, 300);
+      expect(summary?.failed, 1);
+      // The sheet can render "removing 2 of 2" only if the run said so first.
+      expect(reported, [0, 1]);
+      expect(controller.uninstallProgress, isNull);
+      expect(controller.selected, isEmpty);
+      expect(controller.uninstalling, isFalse);
+    },
+  );
+
+  test('a bulk uninstall with nothing selected does not start', () async {
+    await controller.load();
+
+    expect(await controller.uninstallSelected(), isNull);
+    expect(controller.uninstalling, isFalse);
+  });
+
   test('name sort ignores case and follows the direction', () async {
     await controller.load();
 
