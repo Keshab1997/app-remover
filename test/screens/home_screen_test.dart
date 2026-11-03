@@ -36,6 +36,15 @@ void main() {
         .setMockMethodCallHandler(channel, null);
   });
 
+  /// `setSurfaceSize` resizes the render view but not the window metrics
+  /// MediaQuery reads, and the breakpoint is a MediaQuery question.
+  Future<void> resize(WidgetTester tester, double width) async {
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = Size(width, 900);
+    addTearDown(tester.view.reset);
+    await tester.pump();
+  }
+
   Future<void> open(WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -207,6 +216,9 @@ void main() {
         'versionCode': 1,
       },
     ];
+    // The keyboard behaviour is a property of the scrolling list, and a phone
+    // is what shows a ListView: the wide layout is a GridView.
+    await resize(tester, 420);
     await open(tester);
 
     await tester.tap(find.byIcon(Icons.search));
@@ -339,6 +351,109 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.widgetWithText(ActionChip, 'Name'), findsOneWidget);
+  });
+
+  testWidgets('a 640 dp-wide list is two columns side by side', (tester) async {
+    rows = [
+      {
+        'packageName': 'com.example.alpha',
+        'label': 'Alpha',
+        'isSystem': false,
+        'sizeBytes': 100,
+        'firstInstallTime': 1,
+        'lastUpdateTime': 1,
+        'versionName': '1.0',
+        'versionCode': 1,
+      },
+      {
+        'packageName': 'com.example.beta',
+        'label': 'Beta',
+        'isSystem': false,
+        'sizeBytes': 100,
+        'firstInstallTime': 1,
+        'lastUpdateTime': 1,
+        'versionName': '1.0',
+        'versionCode': 1,
+      },
+      {
+        'packageName': 'com.example.gamma',
+        'label': 'Gamma',
+        'isSystem': false,
+        'sizeBytes': 100,
+        'firstInstallTime': 1,
+        'lastUpdateTime': 1,
+        'versionName': '1.0',
+        'versionCode': 1,
+      },
+      {
+        'packageName': 'com.example.delta',
+        'label': 'Delta',
+        'isSystem': false,
+        'sizeBytes': 100,
+        'firstInstallTime': 1,
+        'lastUpdateTime': 1,
+        'versionName': '1.0',
+        'versionCode': 1,
+      },
+    ];
+    await resize(tester, 640);
+    await open(tester);
+
+    expect(find.byType(GridView), findsOneWidget);
+    final left = tester.getRect(find.byType(Card).at(0));
+    final right = tester.getRect(find.byType(Card).at(1));
+    expect(right.top, left.top, reason: 'same row, two columns');
+    expect(right.left, greaterThan(left.left));
+  });
+
+  testWidgets('a phone-width list stays a list', (tester) async {
+    rows = [
+      {
+        'packageName': 'com.example.alpha',
+        'label': 'Alpha',
+        'isSystem': false,
+        'sizeBytes': 100,
+        'firstInstallTime': 1,
+        'lastUpdateTime': 1,
+        'versionName': '1.0',
+        'versionCode': 1,
+      },
+      {
+        'packageName': 'com.example.beta',
+        'label': 'Beta',
+        'isSystem': false,
+        'sizeBytes': 100,
+        'firstInstallTime': 1,
+        'lastUpdateTime': 1,
+        'versionName': '1.0',
+        'versionCode': 1,
+      },
+      {
+        'packageName': 'com.example.gamma',
+        'label': 'Gamma',
+        'isSystem': false,
+        'sizeBytes': 100,
+        'firstInstallTime': 1,
+        'lastUpdateTime': 1,
+        'versionName': '1.0',
+        'versionCode': 1,
+      },
+      {
+        'packageName': 'com.example.delta',
+        'label': 'Delta',
+        'isSystem': false,
+        'sizeBytes': 100,
+        'firstInstallTime': 1,
+        'lastUpdateTime': 1,
+        'versionName': '1.0',
+        'versionCode': 1,
+      },
+    ];
+    await resize(tester, 420);
+    await open(tester);
+
+    expect(find.byType(GridView), findsNothing);
+    expect(find.byType(ListView), findsWidgets);
   });
 
   testWidgets('an empty list is still pull-to-refreshable', (tester) async {

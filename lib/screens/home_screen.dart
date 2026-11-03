@@ -266,37 +266,70 @@ class _HomeScreenState extends State<HomeScreen>
               ),
             ),
           _filterChips(),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.only(top: 8, bottom: 96),
-              // A keyboard left up over a list the user is trying to read hides
-              // three or four rows; the first drag closes it (docs/12 P1-8).
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              itemCount: apps.length,
-              itemBuilder: (context, index) {
-                final app = apps[index];
-                final selecting = _apps.selectionMode;
-                return AppTile(
-                  app: app,
-                  selected: _apps.selected.contains(app.packageName),
-                  selecting: selecting,
-                  // In selection mode a tap means the box; out of it, the
-                  // sheet. Long-press is the only way in, and it is felt.
-                  onTap: () => selecting
-                      ? _apps.toggleSelected(app.packageName)
-                      : _showActions(app),
-                  onLongPress: () {
-                    HapticFeedback.selectionClick();
-                    _apps.toggleSelected(app.packageName);
-                  },
-                  onSelectedChanged: (_) =>
-                      _apps.toggleSelected(app.packageName),
-                );
-              },
-            ),
-          ),
+          Expanded(child: _list(apps)),
         ],
       ),
+    );
+  }
+
+  /// A phone gets a list; 600 dp or more gets the same rows in two columns.
+  /// One 48 px icon per row across a tablet width is a scroll you have to
+  /// finish before you can decide anything (docs/12 P2-13).
+  Widget _list(List<AppInfo> apps) {
+    // A keyboard left up over a list the user is trying to read hides three
+    // or four rows; the first drag closes it (docs/12 P1-8).
+    const dismiss = ScrollViewKeyboardDismissBehavior.onDrag;
+    if (MediaQuery.sizeOf(context).width < _twoColumnBreakpoint) {
+      return ListView.builder(
+        padding: const EdgeInsets.only(top: 8, bottom: 96),
+        keyboardDismissBehavior: dismiss,
+        itemCount: apps.length,
+        itemBuilder: (context, index) => _tile(apps[index]),
+      );
+    }
+    return GridView.builder(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 96),
+      keyboardDismissBehavior: dismiss,
+      itemCount: apps.length,
+      // mainAxisExtent rather than a childAspectRatio: a row is as tall as its
+      // three lines of text, and a ratio would stretch it taller on a wider
+      // screen for no reason.
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 290,
+        mainAxisExtent: 96,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+      ),
+      itemBuilder: (context, index) => _tile(apps[index]),
+    );
+  }
+
+  static const _twoColumnBreakpoint = 600.0;
+
+  /// A bottom sheet that spans 12 inches of tablet is a banner, not a menu:
+  /// same content, centred and capped (docs/12 P2-13). Phones keep the
+  /// framework defaults.
+  BoxConstraints? _sheetConstraints(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    if (size.width < _twoColumnBreakpoint) return null;
+    return BoxConstraints(maxWidth: 560, maxHeight: size.height * 0.75);
+  }
+
+  Widget _tile(AppInfo app) {
+    final selecting = _apps.selectionMode;
+    return AppTile(
+      app: app,
+      selected: _apps.selected.contains(app.packageName),
+      selecting: selecting,
+      // In selection mode a tap means the box; out of it, the sheet. Long-press
+      // is the only way in, and it is felt.
+      onTap: () =>
+          selecting ? _apps.toggleSelected(app.packageName) : _showActions(app),
+      onLongPress: () {
+        HapticFeedback.selectionClick();
+        _apps.toggleSelected(app.packageName);
+      },
+      onSelectedChanged: (_) => _apps.toggleSelected(app.packageName),
     );
   }
 
@@ -429,23 +462,42 @@ class _HomeScreenState extends State<HomeScreen>
                       color: scheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: 8),
-                    Text(l10n.freeMemory, style: small),
-                    const SizedBox(width: 6),
-                    Text(
-                      formatBytes(_apps.freeRam),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const Spacer(),
-                    if (_apps.totalRam > 0)
-                      Text(
-                        l10n.usedOfTotal(
-                          formatBytes(used),
-                          formatBytes(_apps.totalRam),
-                        ),
+                    // Every text in this row can be ellipsised: at 420 dp, or
+                    // at a 3x font scale, the same four facts need 545 px, and
+                    // a RenderFlex overflow is a crash-shaped black stripe.
+                    Expanded(
+                      child: Text(
+                        l10n.freeMemory,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: small,
                       ),
+                    ),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        formatBytes(_apps.freeRam),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    if (_apps.totalRam > 0) ...[
+                      const SizedBox(width: 12),
+                      Flexible(
+                        child: Text(
+                          l10n.usedOfTotal(
+                            formatBytes(used),
+                            formatBytes(_apps.totalRam),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: small,
+                        ),
+                      ),
+                    ],
                     const SizedBox(width: 6),
                     Icon(
                       Icons.chevron_right,
@@ -478,6 +530,7 @@ class _HomeScreenState extends State<HomeScreen>
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
+      constraints: _sheetConstraints(context),
       builder: (sheetContext) => SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -534,6 +587,7 @@ class _HomeScreenState extends State<HomeScreen>
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
+      constraints: _sheetConstraints(context),
       builder: (sheetContext) => StatefulBuilder(
         builder: (context, setSheetState) => SafeArea(
           child: SingleChildScrollView(
@@ -584,6 +638,7 @@ class _HomeScreenState extends State<HomeScreen>
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
+      constraints: _sheetConstraints(context),
       builder: (sheetContext) {
         return SafeArea(
           child: SingleChildScrollView(
@@ -686,7 +741,8 @@ class _HomeScreenState extends State<HomeScreen>
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final count = _apps.selected.length;
-    final summary = await showDialog<UninstallSummary>(
+    // A dialog on a tablet, the full-width sheet Material uses on a phone.
+    final summary = await showAdaptiveDialog<UninstallSummary>(
       context: context,
       // Tapping out mid-run would leave the remaining dialogs unexplained.
       barrierDismissible: false,
