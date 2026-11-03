@@ -114,11 +114,6 @@ class _HomeScreenState extends State<HomeScreen>
                 onPressed: () => setState(() => _searching = true),
               ),
               IconButton(
-                icon: const Icon(Icons.sort),
-                tooltip: l10n.sort,
-                onPressed: _showSortSheet,
-              ),
-              IconButton(
                 icon: const Icon(Icons.refresh),
                 tooltip: l10n.refresh,
                 onPressed: _apps.load,
@@ -305,11 +300,12 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  /// One reason to uninstall, one tap away. A chip the device cannot answer is
-  /// not shown at all: a greyed-out "not used in 90 days" waiting on a
-  /// permission the user has not granted is an ad, not a filter
-  /// (docs/12 P1-7).
+  /// Sort and filters in one row, next to the list they change. Four icons in
+  /// the app bar meant two of them - sort and search - were competing with each
+  /// other for a glance, while the list below had no state you could see
+  /// (docs/12 P1-11).
   Widget _filterChips() {
+    final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
     final chips = <(AppFilter, String)>[
       if (_apps.usageAvailable) (AppFilter.unused, l10n.filterUnused),
@@ -321,6 +317,29 @@ class _HomeScreenState extends State<HomeScreen>
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       child: Row(
         children: [
+          Tooltip(
+            message: l10n.sort,
+            child: ActionChip(
+              avatar: Icon(
+                Icons.sort,
+                size: 18,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              label: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(_sortLabel(l10n)),
+                  const SizedBox(width: 4),
+                  Icon(
+                    _apps.ascending ? Icons.arrow_upward : Icons.arrow_downward,
+                    size: 14,
+                  ),
+                ],
+              ),
+              onPressed: _showSortSheet,
+            ),
+          ),
+          const SizedBox(width: 8),
           for (final (filter, label) in chips)
             Padding(
               padding: const EdgeInsets.only(right: 8),
@@ -503,6 +522,12 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   // --------------------------------------------------------------- actions
+
+  String _sortLabel(AppLocalizations l10n) => switch (_apps.sortField) {
+    SortField.name => l10n.sortName,
+    SortField.date => l10n.sortDate,
+    SortField.size => l10n.sortSize,
+  };
 
   Future<void> _showSortSheet() async {
     final l10n = AppLocalizations.of(context);

@@ -637,6 +637,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Total'**
   String get memoryTotal;
+
+  /// No description provided for @sortName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get sortName;
+
+  /// No description provided for @sortDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get sortDate;
+
+  /// No description provided for @sortSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get sortSize;
 }
 
 class _AppLocalizationsDelegate

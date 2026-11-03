@@ -311,4 +311,13 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get memoryTotal => 'মোট';
+
+  @override
+  String get sortName => 'নাম';
+
+  @override
+  String get sortDate => 'তারিখ';
+
+  @override
+  String get sortSize => 'সাইজ';
 }

@@ -210,5 +210,8 @@
   },
   "deviceMemory": "Device memory",
   "memoryUsed": "Used",
-  "memoryTotal": "Total"
+  "memoryTotal": "Total",
+  "sortName": "Name",
+  "sortDate": "Date",
+  "sortSize": "Size"
 }

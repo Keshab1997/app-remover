@@ -136,5 +136,8 @@
   },
   "deviceMemory": "ডিভাইসের মেমরি",
   "memoryUsed": "ব্যবহৃত",
-  "memoryTotal": "মোট"
+  "memoryTotal": "মোট",
+  "sortName": "নাম",
+  "sortDate": "তারিখ",
+  "sortSize": "সাইজ"
 }

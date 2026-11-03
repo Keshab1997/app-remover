@@ -306,6 +306,41 @@ void main() {
     expect(find.text('2.9 KB / 3.9 KB used'), findsOneWidget);
   });
 
+  testWidgets('sort moved out of the app bar into the list', (tester) async {
+    rows = [
+      {
+        'packageName': 'com.example.maps',
+        'label': 'Maps',
+        'isSystem': false,
+        'sizeBytes': 100,
+        'firstInstallTime': 1,
+        'lastUpdateTime': 1,
+        'versionName': '1.0',
+        'versionCode': 1,
+      },
+    ];
+    await open(tester);
+
+    expect(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byType(IconButton),
+      ),
+      findsNWidgets(3),
+      reason: 'search, refresh, settings - sort belongs to the list',
+    );
+
+    final chip = find.widgetWithText(ActionChip, 'Size');
+    expect(chip, findsOneWidget);
+
+    await tester.tap(chip);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Sort by name'));
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(ActionChip, 'Name'), findsOneWidget);
+  });
+
   testWidgets('an empty list is still pull-to-refreshable', (tester) async {
     await open(tester);
 

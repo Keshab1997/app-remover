@@ -310,4 +310,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get memoryTotal => 'Total';
+
+  @override
+  String get sortName => 'Name';
+
+  @override
+  String get sortDate => 'Date';
+
+  @override
+  String get sortSize => 'Size';
 }
