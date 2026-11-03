@@ -320,4 +320,24 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get sortSize => 'সাইজ';
+
+  @override
+  String get copyPackageName => 'প্যাকেজ নাম কপি করুন';
+
+  @override
+  String get copiedToClipboard => 'ক্লিপবোর্ডে কপি হয়েছে';
+
+  @override
+  String uninstallManyWarning(int count) {
+    return 'প্রতিটি অ্যাপের জন্য আলাদা নিশ্চিতকরণ লাগবে: একটানা $countটি ডায়ালগ';
+  }
+
+  @override
+  String get worksOffline => 'অফলাইনে কাজ করে। কিছুই ফোনের বাইরে যায় না।';
+
+  @override
+  String get dismiss => 'মুছে দিন';
+
+  @override
+  String get clearRecentSearches => 'সাম্প্রতিক সার্চ মুছুন';
 }

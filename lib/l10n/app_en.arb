@@ -213,5 +213,18 @@
   "memoryTotal": "Total",
   "sortName": "Name",
   "sortDate": "Date",
-  "sortSize": "Size"
+  "sortSize": "Size",
+  "copyPackageName": "Copy package name",
+  "copiedToClipboard": "Copied to clipboard",
+  "uninstallManyWarning": "Each app asks for its own confirmation: {count} dialogs in a row",
+  "@uninstallManyWarning": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "worksOffline": "Works offline. Nothing leaves your phone.",
+  "dismiss": "Dismiss",
+  "clearRecentSearches": "Clear recent searches"
 }

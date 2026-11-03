@@ -17,6 +17,8 @@ class AppSettings {
   static const _sortFieldKey = 'sort_field';
   static const _sortAscendingKey = 'sort_ascending';
   static const _systemTabKey = 'system_tab';
+  static const _searchHistoryKey = 'search_history';
+  static const _offlineNoteSeenKey = 'offline_note_seen';
 
   static final ValueNotifier<ThemeMode> themeMode = ValueNotifier(
     ThemeMode.system,
@@ -39,6 +41,17 @@ class AppSettings {
   static final ValueNotifier<bool> sortAscending = ValueNotifier(false);
   static final ValueNotifier<bool> systemTab = ValueNotifier(false);
 
+  /// The last few things typed into search, newest first. Searching for the
+  /// same app again is the common case, and the keyboard does not remember it
+  /// for you (docs/12 P2-14).
+  static final ValueNotifier<List<String>> searchHistory = ValueNotifier(
+    const [],
+  );
+  static const historyLimit = 5;
+
+  /// Whether the one-time "works offline" line has been dismissed.
+  static final ValueNotifier<bool> offlineNoteSeen = ValueNotifier(false);
+
   static Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
     final stored = prefs.getString(_themeKey);
@@ -56,6 +69,47 @@ class AppSettings {
     };
     sortAscending.value = prefs.getBool(_sortAscendingKey) ?? false;
     systemTab.value = prefs.getBool(_systemTabKey) ?? false;
+    searchHistory.value = List.unmodifiable(
+      prefs.getStringList(_searchHistoryKey) ?? const [],
+    );
+    offlineNoteSeen.value = prefs.getBool(_offlineNoteSeenKey) ?? false;
+  }
+
+  static Future<void> rememberSearch(String query) async {
+    final text = query.trim();
+    if (text.isEmpty) return;
+    final previous = searchHistory.value;
+    final next = List<String>.from(
+      <String>[
+        text,
+        ...searchHistory.value.where((q) => q != text),
+      ].take(historyLimit),
+    );
+    if (_sameList(previous, next)) return;
+    searchHistory.value = next;
+    await _persist((prefs) => prefs.setStringList(_searchHistoryKey, next));
+  }
+
+  /// Value equality for a list of strings: the notifier would otherwise fire on
+  /// every repeated search and repaint the whole suggestion row.
+  static bool _sameList(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  static Future<void> clearSearchHistory() async {
+    if (searchHistory.value.isEmpty) return;
+    searchHistory.value = const [];
+    await _persist((prefs) => prefs.remove(_searchHistoryKey));
+  }
+
+  static Future<void> setOfflineNoteSeen() async {
+    if (offlineNoteSeen.value) return;
+    offlineNoteSeen.value = true;
+    await _persist((prefs) => prefs.setBool(_offlineNoteSeenKey, true));
   }
 
   static Future<void> setThemeMode(ThemeMode mode) async {

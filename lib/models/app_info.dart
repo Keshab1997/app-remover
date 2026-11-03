@@ -54,6 +54,18 @@ class AppInfo {
     );
   }
 
+  /// Installed inside [within]. The row says so, because a package that landed
+  /// this week raises "is this mine?" - and that is worth answering without
+  /// opening anything (docs/12 P2-14).
+  bool installedRecently({
+    Duration within = const Duration(days: 7),
+    DateTime? now,
+  }) {
+    if (firstInstallTime <= 0) return false;
+    final at = DateTime.fromMillisecondsSinceEpoch(firstInstallTime);
+    return (now ?? DateTime.now()).difference(at) <= within;
+  }
+
   bool matches(String query) {
     if (query.isEmpty) return true;
     final needle = query.toLowerCase();

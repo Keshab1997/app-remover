@@ -154,6 +154,7 @@ class _HomeScreenState extends State<HomeScreen>
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () {
+          AppSettings.rememberSearch(_search.text);
           _search.clear();
           _apps.setQuery('');
           setState(() => _searching = false);
@@ -167,13 +168,17 @@ class _HomeScreenState extends State<HomeScreen>
         textInputAction: TextInputAction.search,
         textCapitalization: TextCapitalization.none,
         autofillHints: const [],
-        onSubmitted: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+        onSubmitted: (value) {
+          AppSettings.rememberSearch(value);
+          FocusManager.instance.primaryFocus?.unfocus();
+        },
         decoration: InputDecoration(
           hintText: l10n.searchApps,
           border: InputBorder.none,
         ),
         onChanged: _apps.setQuery,
       ),
+      bottom: _searchHistoryBar(l10n),
       actions: [
         IconButton(
           icon: const Icon(Icons.clear),
@@ -184,6 +189,64 @@ class _HomeScreenState extends State<HomeScreen>
           },
         ),
       ],
+    );
+  }
+
+  /// The last few things typed into search. Looking for the same app twice in
+  /// a row is the common case, and the keyboard's own history is neither
+  /// something an app can rely on nor something that leaves the device
+  /// (docs/12 P2-14).
+  ///
+  /// Reads the notifier directly instead of listening to it: the search app bar
+  /// is rebuilt on every keystroke anyway, and the one path that empties the
+  /// history calls setState so the row goes with it.
+  PreferredSizeWidget? _searchHistoryBar(AppLocalizations l10n) {
+    final history = AppSettings.searchHistory.value;
+    if (history.isEmpty) return null;
+    final scheme = Theme.of(context).colorScheme;
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(44),
+      child: Row(
+        children: [
+          const SizedBox(width: 12),
+          Icon(Icons.history, size: 16, color: scheme.onSurfaceVariant),
+          const SizedBox(width: 8),
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (final query in history)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: ActionChip(
+                        label: Text(query),
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () {
+                          _search.text = query;
+                          _apps.setQuery(query);
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.clear_all),
+            iconSize: 18,
+            visualDensity: VisualDensity.compact,
+            tooltip: l10n.clearRecentSearches,
+            onPressed: () {
+              // The rebuild is what removes the row; the write is what makes
+              // the removal survive a restart.
+              setState(() {});
+              AppSettings.clearSearchHistory();
+            },
+          ),
+          const SizedBox(width: 4),
+        ],
+      ),
     );
   }
 
@@ -266,6 +329,7 @@ class _HomeScreenState extends State<HomeScreen>
               ),
             ),
           _filterChips(),
+          if (!system) _offlineNote(l10n),
           Expanded(child: _list(apps)),
         ],
       ),
@@ -301,6 +365,53 @@ class _HomeScreenState extends State<HomeScreen>
         mainAxisSpacing: 8,
       ),
       itemBuilder: (context, index) => _tile(apps[index]),
+    );
+  }
+
+  /// Past this many selected apps the run is worth warning about: Android asks
+  /// for one confirmation per package, and nobody expects 30 of them.
+  static const _confirmFatigueCount = 25;
+
+  /// Shown once. "Does this app phone home?" is the first question an
+  /// uninstaller gets, and the answer is a sentence, not a policy page
+  /// (docs/12 P2-14, matching docs/03).
+  Widget _offlineNote(AppLocalizations l10n) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return ValueListenableBuilder<bool>(
+      valueListenable: AppSettings.offlineNoteSeen,
+      builder: (context, seen, _) {
+        if (seen) return const SizedBox.shrink();
+        return Container(
+          margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+          padding: const EdgeInsets.fromLTRB(12, 6, 4, 6),
+          decoration: BoxDecoration(
+            color: scheme.surfaceContainerHigh,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.wifi_off, size: 18, color: scheme.onSurfaceVariant),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l10n.worksOffline,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              IconButton(
+                iconSize: 18,
+                visualDensity: VisualDensity.compact,
+                icon: const Icon(Icons.close),
+                tooltip: l10n.dismiss,
+                onPressed: AppSettings.setOfflineNoteSeen,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -635,6 +746,9 @@ class _HomeScreenState extends State<HomeScreen>
     FocusManager.instance.primaryFocus?.unfocus();
     final scheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context);
+    // Captured before the sheet opens: once it is popped, the sheet's own
+    // context can no longer find the ScaffoldMessenger.
+    final messenger = ScaffoldMessenger.of(context);
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -706,6 +820,24 @@ class _HomeScreenState extends State<HomeScreen>
                   },
                 ),
                 ListTile(
+                  // The one string you actually want off this screen, and a
+                  // Text inside a sheet cannot be selected (docs/12 P2-14).
+                  leading: const Icon(Icons.copy_all_outlined),
+                  title: Text(l10n.copyPackageName),
+                  subtitle: Text(
+                    app.packageName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  onTap: () {
+                    Clipboard.setData(ClipboardData(text: app.packageName));
+                    Navigator.pop(sheetContext);
+                    messenger.showSnackBar(
+                      SnackBar(content: Text(l10n.copiedToClipboard)),
+                    );
+                  },
+                ),
+                ListTile(
                   enabled: !app.isSystem,
                   leading: Icon(
                     Icons.delete_outline,
@@ -763,6 +895,27 @@ class _HomeScreenState extends State<HomeScreen>
                   '${l10n.appsAndSize(count, formatBytes(_apps.selectedSize))}\n'
                   '${l10n.uninstallConfirmBody}',
                 ),
+                if (count > _confirmFatigueCount) ...[
+                  // Better said here than discovered at the ninth dialog.
+                  const SizedBox(height: 12),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        size: 18,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          l10n.uninstallManyWarning(count),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 if (running) ...[
                   const SizedBox(height: 20),
                   ClipRRect(

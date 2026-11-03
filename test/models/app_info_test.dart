@@ -216,4 +216,30 @@ void main() {
       );
     });
   });
+  group('installedRecently', () {
+    final now = DateTime.utc(2026, 11, 3);
+
+    test('is a week, not a fortnight', () {
+      expect(
+        _app(
+          firstInstallTime: now
+              .subtract(const Duration(days: 2))
+              .millisecondsSinceEpoch,
+        ).installedRecently(now: now),
+        isTrue,
+      );
+      expect(
+        _app(
+          firstInstallTime: now
+              .subtract(const Duration(days: 9))
+              .millisecondsSinceEpoch,
+        ).installedRecently(now: now),
+        isFalse,
+      );
+    });
+
+    test('an unknown install date is not recent', () {
+      expect(_app().installedRecently(now: now), isFalse);
+    });
+  });
 }

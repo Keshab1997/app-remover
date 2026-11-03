@@ -319,4 +319,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sortSize => 'Size';
+
+  @override
+  String get copyPackageName => 'Copy package name';
+
+  @override
+  String get copiedToClipboard => 'Copied to clipboard';
+
+  @override
+  String uninstallManyWarning(int count) {
+    return 'Each app asks for its own confirmation: $count dialogs in a row';
+  }
+
+  @override
+  String get worksOffline => 'Works offline. Nothing leaves your phone.';
+
+  @override
+  String get dismiss => 'Dismiss';
+
+  @override
+  String get clearRecentSearches => 'Clear recent searches';
 }

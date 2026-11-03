@@ -78,4 +78,36 @@ void main() {
     expect(AppSettings.sortAscending.value, isFalse);
     expect(AppSettings.systemTab.value, isFalse);
   });
+  test(
+    'the last five searches are kept, newest first, without repeats',
+    () async {
+      SharedPreferences.setMockInitialValues({});
+      await AppSettings.load();
+
+      for (final query in ['map', 'games', 'map', ' a ', 'b', 'c', 'd']) {
+        await AppSettings.rememberSearch(query);
+      }
+
+      expect(AppSettings.searchHistory.value, ['d', 'c', 'b', 'a', 'map']);
+
+      AppSettings.searchHistory.value = const [];
+      await AppSettings.load();
+      expect(AppSettings.searchHistory.value, ['d', 'c', 'b', 'a', 'map']);
+
+      await AppSettings.clearSearchHistory();
+      expect(AppSettings.searchHistory.value, isEmpty);
+    },
+  );
+
+  test('the offline note is shown once', () async {
+    SharedPreferences.setMockInitialValues({});
+    await AppSettings.load();
+    expect(AppSettings.offlineNoteSeen.value, isFalse);
+
+    await AppSettings.setOfflineNoteSeen();
+    AppSettings.offlineNoteSeen.value = false;
+    await AppSettings.load();
+
+    expect(AppSettings.offlineNoteSeen.value, isTrue);
+  });
 }

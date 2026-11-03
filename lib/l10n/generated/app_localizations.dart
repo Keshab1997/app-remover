@@ -655,6 +655,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Size'**
   String get sortSize;
+
+  /// No description provided for @copyPackageName.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy package name'**
+  String get copyPackageName;
+
+  /// No description provided for @copiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get copiedToClipboard;
+
+  /// No description provided for @uninstallManyWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Each app asks for its own confirmation: {count} dialogs in a row'**
+  String uninstallManyWarning(int count);
+
+  /// No description provided for @worksOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Works offline. Nothing leaves your phone.'**
+  String get worksOffline;
+
+  /// No description provided for @dismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get dismiss;
+
+  /// No description provided for @clearRecentSearches.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear recent searches'**
+  String get clearRecentSearches;
 }
 
 class _AppLocalizationsDelegate

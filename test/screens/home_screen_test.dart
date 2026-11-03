@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:goodbye_apps/l10n/generated/app_localizations.dart';
 import 'package:goodbye_apps/models/app_info.dart';
+import 'package:goodbye_apps/widgets/app_tile.dart';
 import 'package:goodbye_apps/screens/home_screen.dart';
 import 'package:goodbye_apps/services/settings.dart';
 
@@ -454,6 +455,128 @@ void main() {
 
     expect(find.byType(GridView), findsNothing);
     expect(find.byType(ListView), findsWidgets);
+  });
+
+  testWidgets('a fresh install is marked on the row', (tester) async {
+    final recent = DateTime.now().subtract(const Duration(days: 2));
+    rows = [
+      {
+        'packageName': 'com.example.maps',
+        'label': 'Maps',
+        'isSystem': false,
+        'sizeBytes': 100,
+        'firstInstallTime': recent.millisecondsSinceEpoch,
+        'lastUpdateTime': recent.millisecondsSinceEpoch,
+        'versionName': '1.0',
+        'versionCode': 1,
+      },
+    ];
+    await open(tester);
+
+    expect(
+      find.descendant(
+        of: find.byType(AppTile),
+        matching: find.text('Installed recently'),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('the sheet copies the package name', (tester) async {
+    rows = [
+      {
+        'packageName': 'com.example.maps',
+        'label': 'Maps',
+        'isSystem': false,
+        'sizeBytes': 100,
+        'firstInstallTime': 1,
+        'lastUpdateTime': 1,
+        'versionName': '1.0',
+        'versionCode': 1,
+      },
+    ];
+    await open(tester);
+
+    await tester.tap(find.text('Maps'));
+    await tester.pumpAndSettle();
+    expect(find.text('com.example.maps'), findsWidgets);
+    // The row is below the fold on a 600 px viewport, which is the point of the
+    // sheet scrolling.
+    await tester.ensureVisible(find.text('Copy package name'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Copy package name'));
+    await tester.pumpAndSettle();
+
+    // The test binding's own clipboard fake does not hand the text back, so
+    // this asserts the confirmation the user sees: the sheet closed and the
+    // row reported what it did.
+    expect(find.text('Copied to clipboard'), findsOneWidget);
+    expect(find.text('Copy package name'), findsNothing);
+  });
+
+  testWidgets('a 30-app batch is warned about before it starts', (
+    tester,
+  ) async {
+    rows = [
+      for (var i = 0; i < 30; i++)
+        {
+          'packageName': 'com.example.app$i',
+          'label': 'App $i',
+          'isSystem': false,
+          'sizeBytes': 100,
+          'firstInstallTime': 1,
+          'lastUpdateTime': 1,
+          'versionName': '1.0',
+          'versionCode': 1,
+        },
+    ];
+    await open(tester);
+
+    await tester.longPress(find.text('App 0'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.select_all));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Uninstall'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Each app asks for its own confirmation: 30 dialogs in a row'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('search remembers what you typed', (tester) async {
+    rows = [
+      {
+        'packageName': 'com.example.maps',
+        'label': 'Maps',
+        'isSystem': false,
+        'sizeBytes': 100,
+        'firstInstallTime': 1,
+        'lastUpdateTime': 1,
+        'versionName': '1.0',
+        'versionCode': 1,
+      },
+    ];
+    await open(tester);
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'map');
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pumpAndSettle();
+
+    // Leave search and come back: the query is offered as a chip, and one tap
+    // puts it back in the field.
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(ActionChip, 'map'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.clear_all));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(ActionChip, 'map'), findsNothing);
   });
 
   testWidgets('an empty list is still pull-to-refreshable', (tester) async {

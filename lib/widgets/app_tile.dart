@@ -57,13 +57,27 @@ class AppTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      app.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            app.label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        if (app.installedRecently()) ...[
+                          const SizedBox(width: 8),
+                          // Flexible, not fixed: on a narrow grid cell the
+                          // name next to it has to survive the badge.
+                          Flexible(
+                            child: _RecentBadge(label: l10n.filterRecent),
+                          ),
+                        ],
+                      ],
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -77,13 +91,18 @@ class AppTile extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Text(
-                          formatBytes(app.sizeBytes),
-                          // labelSmall is 11 px, below what most users can
-                          // read and below the smallest size a screen reader
-                          // is worth shrinking to (docs/12 P2-12).
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
+                        // Both halves of the meta line give way to the other:
+                        // in a 290 px grid tile the pair does not fit at a
+                        // readable size, and an overflow stripe across a row is
+                        // worse than an ellipsis (docs/12 P2-13, P2-12).
+                        Flexible(
+                          child: Text(
+                            formatBytes(app.sizeBytes),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -136,6 +155,35 @@ class AppTile extends StatelessWidget {
       }
     }
     return formatDate(app.changedAt);
+  }
+}
+
+/// The one thing on this row that needs no reading: it is new.
+class _RecentBadge extends StatelessWidget {
+  const _RecentBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      // Capped and ellipsised: the name beside it matters more than the badge,
+      // and a translation can be twice as long as the English.
+      constraints: const BoxConstraints(maxWidth: 140),
+      decoration: BoxDecoration(
+        color: scheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: Theme.of(context).textTheme.labelMedium
+            ?.copyWith(color: scheme.onSecondaryContainer),
+      ),
+    );
   }
 }
 
