@@ -44,7 +44,14 @@ class AppTile extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
           child: Row(
             children: [
-              LazyAppIcon(packageName: app.packageName, scheme: scheme),
+              // Decorative: the label is right next to it, and TalkBack would
+              // otherwise read "android, icon" before every app name.
+              ExcludeSemantics(
+                child: LazyAppIcon(
+                  packageName: app.packageName,
+                  scheme: scheme,
+                ),
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -72,7 +79,10 @@ class AppTile extends StatelessWidget {
                       children: [
                         Text(
                           formatBytes(app.sizeBytes),
-                          style: theme.textTheme.labelSmall?.copyWith(
+                          // labelSmall is 11 px, below what most users can
+                          // read and below the smallest size a screen reader
+                          // is worth shrinking to (docs/12 P2-12).
+                          style: theme.textTheme.bodySmall?.copyWith(
                             color: scheme.onSurfaceVariant,
                           ),
                         ),
@@ -84,7 +94,7 @@ class AppTile extends StatelessWidget {
                             _changed(l10n),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.labelSmall?.copyWith(
+                            style: theme.textTheme.bodySmall?.copyWith(
                               color: scheme.onSurfaceVariant,
                             ),
                           ),
@@ -95,10 +105,17 @@ class AppTile extends StatelessWidget {
                 ),
               ),
               if (selecting)
-                Checkbox(
-                  value: selected,
-                  onChanged: (value) => onSelectedChanged(value ?? false),
-                  shape: const CircleBorder(),
+                // "Checkbox, unchecked" tells a screen-reader user nothing
+                // about which app they are about to remove; the name has to
+                // travel with the control (docs/12 P2-12).
+                Semantics(
+                  selected: selected,
+                  label: app.label,
+                  child: Checkbox(
+                    value: selected,
+                    onChanged: (value) => onSelectedChanged(value ?? false),
+                    shape: const CircleBorder(),
+                  ),
                 ),
             ],
           ),
@@ -206,20 +223,30 @@ class AppIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
-      child: SizedBox(width: 48, height: 48, child: _content()),
+      child: SizedBox(width: 48, height: 48, child: _content(context)),
     );
   }
 
-  Widget _content() {
+  Widget _content(BuildContext context) {
     final bytes = icon;
     if (bytes == null || bytes.isEmpty) return _fallback();
-    return Image.memory(
+    final image = Image.memory(
       bytes,
       width: 48,
       height: 48,
       fit: BoxFit.cover,
       gaplessPlayback: true,
       errorBuilder: (_, _, _) => _fallback(),
+    );
+    // Icons land row by row as IconStore fills its cache, so each one cross-
+    // fades from the placeholder instead of popping in (docs/12 P2-14) - and
+    // does not fade at all when the system says not to animate.
+    if (MediaQuery.maybeOf(context)?.disableAnimations ?? false) {
+      return image;
+    }
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 150),
+      child: image,
     );
   }
 
