@@ -236,4 +236,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get version => 'ভার্সন';
+
+  @override
+  String get clearSearch => 'সার্চ মুছুন';
 }

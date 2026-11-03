@@ -172,12 +172,14 @@ class _HomeScreenState extends State<HomeScreen>
       );
     }
     if (_apps.failure != null) {
-      return _EmptyState(
-        icon: Icons.error_outline,
-        title: l10n.loadFailed,
-        action: FilledButton.tonal(
-          onPressed: _apps.load,
-          child: Text(l10n.tryAgain),
+      return _refreshable(
+        _EmptyState(
+          icon: Icons.error_outline,
+          title: l10n.loadFailed,
+          action: FilledButton.tonal(
+            onPressed: _apps.load,
+            child: Text(l10n.tryAgain),
+          ),
         ),
       );
     }
@@ -191,17 +193,32 @@ class _HomeScreenState extends State<HomeScreen>
     final l10n = AppLocalizations.of(context);
     final apps = _apps.appsFor(system: system);
     if (apps.isEmpty) {
-      return _EmptyState(
-        icon: Icons.apps_outlined,
-        title: _apps.query.isEmpty ? l10n.appsNotFound : l10n.noMatches,
-        subtitle: _apps.query.isEmpty
-            ? l10n.pullToRefresh
-            : l10n.tryDifferentSearch,
+      // The copy below promises a pull; without the wrapper here it would be
+      // a dead instruction exactly when there is nothing else to tap.
+      return _refreshable(
+        _EmptyState(
+          icon: _apps.query.isEmpty ? Icons.apps_outlined : Icons.search_off,
+          title: _apps.query.isEmpty ? l10n.appsNotFound : l10n.noMatches,
+          subtitle: _apps.query.isEmpty
+              ? l10n.pullToRefresh
+              : l10n.tryDifferentSearch,
+          action: _apps.query.isEmpty
+              ? FilledButton.tonal(
+                  onPressed: _apps.load,
+                  child: Text(l10n.refresh),
+                )
+              : FilledButton.tonal(
+                  onPressed: () {
+                    _search.clear();
+                    _apps.setQuery('');
+                  },
+                  child: Text(l10n.clearSearch),
+                ),
+        ),
       );
     }
-    return RefreshIndicator(
-      onRefresh: _apps.load,
-      child: ListView.builder(
+    return _refreshable(
+      ListView.builder(
         padding: const EdgeInsets.only(top: 8, bottom: 96),
         itemCount: apps.length,
         itemBuilder: (context, index) {
@@ -217,6 +234,11 @@ class _HomeScreenState extends State<HomeScreen>
       ),
     );
   }
+
+  /// Pull-to-refresh, in every state of the list — loading UI included, so a
+  /// stuck frame is never a dead end.
+  Widget _refreshable(Widget child) =>
+      RefreshIndicator(onRefresh: _apps.load, child: child);
 
   // ------------------------------------------------------------ selection
 

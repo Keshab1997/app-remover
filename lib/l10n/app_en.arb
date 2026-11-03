@@ -142,5 +142,6 @@
   },
   "sendFeedback": "Send feedback",
   "privacyPolicy": "Privacy policy",
-  "version": "Version"
+  "version": "Version",
+  "clearSearch": "Clear search"
 }

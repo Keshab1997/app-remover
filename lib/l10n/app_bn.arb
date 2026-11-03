@@ -68,5 +68,6 @@
   "shareBody": "Goodbye Apps দেখুন — দুই ট্যাপে অ্যাপ আনইনস্টল করুন।\n{link}",
   "sendFeedback": "মতামত পাঠান",
   "privacyPolicy": "প্রাইভেসি পলিসি",
-  "version": "ভার্সন"
+  "version": "ভার্সন",
+  "clearSearch": "সার্চ মুছুন"
 }
