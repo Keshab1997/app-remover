@@ -1,6 +1,12 @@
 # 12 — UX/design pass (user-এর জন্য আরও ভালো)
 
 **Priority:** retention + review-রেটিং — Play-তে "good but confusing" রিভিউগুলো এখান থেকেই আসে
+
+**Status:** সব ১৪টাই করা — একটা commit প্রতিটা item, ক্রম অনুযায়ী (নিচে commit
+map)। `flutter test` = ৭৬ টেস্ট green, `flutter analyze --fatal-infos` = কিছু
+নাই। যেটা সত্যি মাপতে ডিভাইস লাগে (haptics, আসল IME, TalkBack, real
+usage-stats, ট্যাবলেটে গ্রিড) সেটা device QA-র জন্য বাকি — doc 05-এর সাথে
+মিলিয়ে দেখবে।
 **Effort:** পুরোটা ১–২ দিন; P0 গুলো আলাদা আলাদা করেও করা যাবে (প্রতিটা ~৩০–৬০ মিনিট)
 
 এটা code review থেকে বের করা list, ধারণা নয় — প্রতিটা item-এর পাশেই কোথায়
@@ -217,16 +223,47 @@ strip। দুটো অ্যাডাপ্টেশন:
 
 ## Acceptance
 
-- [ ] empty + error state-এ pull করলে refresh হয়, নাহলে copy মিথ্যা
-- [ ] usage access না থাকলে-ও detailed sizes feature দৃশ্যমান (prompt দেখায়)
-- [ ] batch uninstall-এ progress + "Freed X GB" feedback আছে
-- [ ] প্রথম frame skeleton, spinner না
-- [ ] select-all সঠিক tab-এর app নেয় (swipe মাঝখানে চাপলেও)
-- [ ] default sort = size desc, আর sort/tab restart-এ মনে থাকে
-- [ ] search-এ keyboard dragscroll-ে বন্ধ হয়
-- [ ] normal mode-এ checkbox নেই, selection mode-এ আছে
-- [ ] screen reader প্রতিটা toggle-র নাম বলে
-- [ ] 600dp+ এ দুই কলাম
+- [x] empty + error state-এ pull করলে refresh হয়, নাহলে copy মিথ্যা — `6375bb4`
+- [x] usage access না থাকলে-ও detailed sizes feature দৃশ্যমান (prompt দেখায়) — `badf374`
+- [x] batch uninstall-এ progress + "Freed X GB" feedback আছে — `2b20a67`
+- [x] প্রথম frame skeleton, spinner না — `8ec4fc9`
+- [x] select-all সঠিক tab-এর app নেয় (swipe মাঝখানে চাপলেও) — `4fa9bc9`
+- [x] default sort = size desc, আর sort/tab restart-এ মনে থাকে — `fcd056e`
+- [x] search-এ keyboard dragscroll-ে বন্ধ হয় — `dd4ecb1`
+- [x] normal mode-এ checkbox নেই, selection mode-এ আছে — `d39ab07`
+- [x] screen reader প্রতিটা toggle-র নাম বলে — `baba4a5`
+- [x] 600dp+ এ দুই কলাম — `5320059`
+
+## Commit map
+
+| Item | Commit | নতুন behavior |
+|---|---|---|
+| P0-1 | `6375bb4` | `_refreshable()` তিন state-তেই; empty-এ Refresh button, no-matches-এ Clear search |
+| P0-2 | `badf374` | sheet-এ "Exact sizes need usage access" + Enable / ×, `sizes_hint_on` |
+| P0-3 | `2b20a67` | dialog খোলা থাকতে progress, শেষে "Freed … from N apps", haptics |
+| P0-4 | `8ec4fc9` | ৮টা skeleton row (reduce-motion মানছে), refresh-এ list অটুট |
+| P0-5 | `4fa9bc9` | tab কোনটা সেটা controller-এর কাছে; "Select all 2 in User apps" |
+| P1-6 | `fcd056e` | default size-desc + `sort_field` / `sort_ascending` / `system_tab` |
+| P1-7 | `995bb4a` | `lastTimeUsed` (Kotlin), filter chips, "Not opened since …" |
+| P1-8 | `dd4ecb1` | `TextInputAction.search`, onDrag dismiss, "Showing 1 of 2 apps" |
+| P1-9 | `d39ab07` | checkbox শুধু selection mode-এ, tap মানে toggle |
+| P1-10 | `bbf90ff` | পুরো memory bar-ই tap → sheet, 2px usage bar |
+| P1-11 | `ef09d0e` | app bar ৩টা action, sort list-এর chip-এ |
+| P2-12 | `baba4a5` | Semantics label, meta line bodySmall, 3× fontScale test |
+| P2-13 | `5320059` | 600dp+ গ্রিড, `showAdaptiveDialog`, 420dp overflow ঠিক |
+| P2-14 | `f954f0e` | recent badge, copy package name, >25 warning, offline note, search history |
+
+### ডিভাইস ছাড়া যা যাচাই হয়নি
+
+- **Kotlin** (`995bb4a`-এর `lastUsedTimes()`): CI Kotlin compile করে না (`ci.yml`-এ
+  `build-apk: false`), তাই দেখাতে হলে `Build Android APK or AAB (Manual)`
+  dispatch — সেটা শুধু Keshab পারেন।
+- **Haptics** — emulator-এ সাধারণত টের পাওয়া যায় না, physical ডিভাইস চাই।
+- **IME** — `onDrag`/`TextInputAction.search` টেস্টে property হিসেবেই দেখা গেছে;
+  আসল keyboard কয়টা row ঢাকে সেটা চোখে দেখা।
+- **TalkBack** — `Semantics` label টেস্ট আছে, announcement নেই।
+- **Usage stats** — `queryUsageStats`-এর bucket behaviour ফোনের উপর ছেড়ে যায়;
+  permission বন্ধ থাকলে chips গায়েব, সেটাই test করা।
 
 ## Files
 

@@ -11,13 +11,13 @@ spec আছে। প্রতিটা doc-এ **কী বানাতে হ�
 | 03 | [Play Console listing](03-play-console.md) | Listing copy, data safety, `QUERY_ALL_PACKAGES` declaration, testing track | ✅ Play-তে যেতে | ২ ঘণ্টা |
 | 04 | [Privacy policy](04-privacy-policy.md) | Host করার মতো পুরো policy text + permissions ব্যাখ্যা | ✅ Play-তে যেতে | ১ ঘণ্টা |
 | 05 | [Testing checklist](05-testing-checklist.md) | Device matrix, edge case, release-এর আগে QA | ✅ Play-তে যেতে | ২ ঘণ্টা |
-| 06 | [Status bar notification](06-status-bar-notification.md) | Original-এর status bar feature + permission flow | না | ৩–৪ ঘণ্টা |
-| 07 | [Icon lazy-loading](07-icon-lazy-loading.md) | ২০০+ app-এ list fast করা | না | ৩ ঘণ্টা |
-| 08 | [Accurate app size](08-accurate-app-size.md) | APK + data + cache size (StorageStatsManager) | না | ২ ঘণ্টা |
-| 09 | [Home screen shortcut](09-home-screen-shortcut.md) | যেকোনো app-এর pinned shortcut | না | ১–২ ঘণ্টা |
-| 10 | [Bangla localization](10-bangla-localization.md) | `app_bn.arb`, সব string extract | না | ৩ ঘণ্টা |
+| 06 | [Status bar notification](06-status-bar-notification.md) | Original-এর status bar feature + permission flow | ✅ কোডে, QA বাকি | ৩–৪ ঘণ্টা |
+| 07 | [Icon lazy-loading](07-icon-lazy-loading.md) | ২০০+ app-এ list fast করা | ✅ কোডে, QA বাকি | ৩ ঘণ্টা |
+| 08 | [Accurate app size](08-accurate-app-size.md) | APK + data + cache size (StorageStatsManager) | ✅ কোডে, QA বাকি | ২ ঘণ্টা |
+| 09 | [Home screen shortcut](09-home-screen-shortcut.md) | যেকোনো app-এর pinned shortcut | ✅ কোডে, QA বাকি | ১–২ ঘণ্টা |
+| 10 | [Bangla localization](10-bangla-localization.md) | `app_bn.arb`, সব string extract | ✅ কোডে, QA বাকি | ৩ ঘণ্টা |
 | 11 | [Ads & Remove Ads](11-ads-and-iap.md) | AdMob + one-time purchase (original-এ ছিল) | না | ১ দিন |
-| 12 | [UX & design pass](12-ux-and-design-pass.md) | Empty/refresh dead-end, freed-space feedback, skeleton, no-usage chips, selection pattern, a11y | না | ১–২ দিন |
+| 12 | [UX & design pass](12-ux-and-design-pass.md) | Empty/refresh dead-end, freed-space feedback, skeleton, no-usage chips, selection pattern, a11y | ✅ কোডে, QA বাকি | ১–২ দিন |
 
 ## Suggested order
 
