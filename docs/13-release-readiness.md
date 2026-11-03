@@ -5,10 +5,12 @@ requirements in Play Console before submission.
 
 ## Before submission
 
-- [ ] Host and review the privacy policy in `docs/legal/` at a real, public URL;
-  replace the placeholder URL in `lib/screens/settings_screen.dart`. Verify the
-  support email there belongs to the developer and works. Do not submit the
-  placeholder `goodbyeapps.com` details without verification.
+- [ ] Verify the public privacy policy at
+  `https://keshab1997.github.io/goodbyeapps-legal/privacy-policy.html` loads,
+  review its accuracy, and use that URL in Play Console. Confirm the support
+  email `Keshabsarkar2018@gmail.com` can receive messages. Older listing drafts
+  and documents may still mention the previous placeholder address; review and
+  update the Play listing before submission.
 - [ ] Review Data safety and permission declarations against the actual app and
   all dependencies. Installed-app inventory is sensitive: justify
   `QUERY_ALL_PACKAGES` as core app management and supply the demonstration Play

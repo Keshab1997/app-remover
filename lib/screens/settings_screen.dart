@@ -6,10 +6,10 @@ import '../services/settings.dart';
 
 const String appPackageId = 'com.keshabstudios.goodbyeapps';
 
-// TODO: host these on goodbyeapps.com before publishing (or point them at an
-// existing privacy policy / support inbox).
-const String privacyPolicyUrl = 'https://goodbyeapps.com/privacy-policy';
-const String supportEmail = 'hello@goodbyeapps.com';
+// Keep these in sync with the public policy and the Play Console listing.
+const String privacyPolicyUrl =
+    'https://keshab1997.github.io/goodbyeapps-legal/privacy-policy.html';
+const String supportEmail = 'Keshabsarkar2018@gmail.com';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
