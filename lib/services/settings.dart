@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../models/app_info.dart';
 
 /// User preferences persisted with shared_preferences.
 class AppSettings {
@@ -11,6 +14,9 @@ class AppSettings {
   /// a memory refresh should also repaint the tray notification (docs/06).
   static const _statusBarKey = 'status_bar_enabled';
   static const _sizesHintKey = 'sizes_hint_on';
+  static const _sortFieldKey = 'sort_field';
+  static const _sortAscendingKey = 'sort_ascending';
+  static const _systemTabKey = 'system_tab';
 
   static final ValueNotifier<ThemeMode> themeMode = ValueNotifier(
     ThemeMode.system,
@@ -23,6 +29,16 @@ class AppSettings {
   /// access (docs/12 P0-2).
   static final ValueNotifier<bool> sizesHint = ValueNotifier(true);
 
+  /// Sort order and last tab. Opening the app on the same view it was left on
+  /// is the whole point: a 200-app list sorted by size descending once should
+  /// not have to be sorted again on every launch (docs/12 P1-6). The defaults
+  /// are that same view, because size is the one thing this app can act on.
+  static final ValueNotifier<SortField> sortField = ValueNotifier(
+    SortField.size,
+  );
+  static final ValueNotifier<bool> sortAscending = ValueNotifier(false);
+  static final ValueNotifier<bool> systemTab = ValueNotifier(false);
+
   static Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
     final stored = prefs.getString(_themeKey);
@@ -33,6 +49,13 @@ class AppSettings {
     };
     statusBar.value = prefs.getBool(_statusBarKey) ?? false;
     sizesHint.value = prefs.getBool(_sizesHintKey) ?? true;
+    sortField.value = switch (prefs.getString(_sortFieldKey)) {
+      'name' => SortField.name,
+      'date' => SortField.date,
+      _ => SortField.size,
+    };
+    sortAscending.value = prefs.getBool(_sortAscendingKey) ?? false;
+    systemTab.value = prefs.getBool(_systemTabKey) ?? false;
   }
 
   static Future<void> setThemeMode(ThemeMode mode) async {
@@ -43,6 +66,34 @@ class AppSettings {
       ThemeMode.dark => 'dark',
       ThemeMode.system => 'system',
     });
+  }
+
+  static Future<void> setSort(SortField field, bool ascending) async {
+    sortField.value = field;
+    sortAscending.value = ascending;
+    await _persist((prefs) async {
+      await prefs.setString(_sortFieldKey, field.name);
+      await prefs.setBool(_sortAscendingKey, ascending);
+    });
+  }
+
+  static Future<void> setSystemTab(bool system) async {
+    systemTab.value = system;
+    await _persist((prefs) => prefs.setBool(_systemTabKey, system));
+  }
+
+  /// Writes through to the store when there is one. The in-memory notifier has
+  /// already been updated by the caller, so a build with no store behind it -
+  /// a widget test, a platform the plugin does not serve - loses a preference
+  /// and nothing else.
+  static Future<void> _persist(
+    Future<void> Function(SharedPreferences prefs) write,
+  ) async {
+    try {
+      await write(await SharedPreferences.getInstance());
+    } on MissingPluginException {
+      // Nothing to persist to.
+    }
   }
 
   static Future<void> setSizesHint(bool show) async {

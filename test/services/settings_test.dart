@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:goodbye_apps/models/app_info.dart';
 import 'package:goodbye_apps/services/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,6 +10,9 @@ void main() {
   setUp(() {
     AppSettings.themeMode.value = ThemeMode.system;
     AppSettings.statusBar.value = false;
+    AppSettings.sortField.value = SortField.size;
+    AppSettings.sortAscending.value = false;
+    AppSettings.systemTab.value = false;
   });
 
   test('defaults are system theme and no notification', () async {
@@ -50,5 +54,28 @@ void main() {
 
     await AppSettings.load();
     expect(AppSettings.themeMode.value, ThemeMode.dark);
+  });
+  test('sort order and last tab outlive a restart', () async {
+    SharedPreferences.setMockInitialValues({});
+
+    await AppSettings.setSort(SortField.name, true);
+    await AppSettings.setSystemTab(true);
+    AppSettings.sortField.value = SortField.size;
+    AppSettings.sortAscending.value = false;
+    AppSettings.systemTab.value = false;
+    await AppSettings.load();
+
+    expect(AppSettings.sortField.value, SortField.name);
+    expect(AppSettings.sortAscending.value, isTrue);
+    expect(AppSettings.systemTab.value, isTrue);
+  });
+
+  test('a first run sorts by size, biggest first', () async {
+    SharedPreferences.setMockInitialValues({});
+    await AppSettings.load();
+
+    expect(AppSettings.sortField.value, SortField.size);
+    expect(AppSettings.sortAscending.value, isFalse);
+    expect(AppSettings.systemTab.value, isFalse);
   });
 }

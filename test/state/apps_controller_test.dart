@@ -1,7 +1,9 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:goodbye_apps/models/app_info.dart';
+import 'package:goodbye_apps/services/settings.dart';
 import 'package:goodbye_apps/state/apps_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// What the Kotlin side answers for `listApps`. `setUp` copies it into a
 /// mutable list so a test can change the device between loads.
@@ -68,6 +70,11 @@ void main() {
   late AppsController controller;
 
   setUp(() {
+    // AppSettings holds the sort in a static notifier, and AppsController
+    // starts from it, so a test that sorts cannot leak its order into the next.
+    AppSettings.sortField.value = SortField.size;
+    AppSettings.sortAscending.value = false;
+    AppSettings.systemTab.value = false;
     rows = List.of(_deviceRows);
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
@@ -167,8 +174,39 @@ void main() {
     expect(controller.uninstalling, isFalse);
   });
 
+  test('the list opens with the biggest app first', () async {
+    await controller.load();
+
+    // The default is the question the app answers: what is worth removing.
+    expect(controller.sortField, SortField.size);
+    expect(controller.ascending, isFalse);
+    expect(controller.appsFor(system: false).map((a) => a.sizeBytes), [
+      300,
+      200,
+      100,
+      1,
+    ]);
+  });
+
+  test('a chosen sort is written to the store', () async {
+    SharedPreferences.setMockInitialValues({});
+    await controller.load();
+
+    controller.setSort(SortField.date, ascending: true);
+    // setSort fires the write without awaiting it, so the list repaints
+    // before the store is asked to remember.
+    await pumpEventQueue();
+
+    expect(AppSettings.sortField.value, SortField.date);
+    expect(AppSettings.sortAscending.value, isTrue);
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString('sort_field'), 'date');
+    expect(prefs.getBool('sort_ascending'), isTrue);
+  });
+
   test('currentApps follows the tab the controller was told about', () async {
     await controller.load();
+    controller.setSort(SortField.name, ascending: true);
 
     expect(controller.systemTab, isFalse);
     expect(controller.currentApps.map((a) => a.label), [
@@ -184,6 +222,7 @@ void main() {
 
   test('name sort ignores case and follows the direction', () async {
     await controller.load();
+    controller.setSort(SortField.name, ascending: true);
 
     expect(controller.appsFor(system: false).map((a) => a.label), [
       'Camera',
@@ -203,7 +242,7 @@ void main() {
 
   test('date sort uses the newest of install and update', () async {
     await controller.load();
-    controller.setSort(SortField.date);
+    controller.setSort(SortField.date, ascending: true);
 
     expect(controller.appsFor(system: false).map((a) => a.packageName), [
       'com.example.iconless', // no timestamps at all -> epoch
@@ -215,7 +254,7 @@ void main() {
 
   test('size sort orders by bytes', () async {
     await controller.load();
-    controller.setSort(SortField.size);
+    controller.setSort(SortField.size, ascending: true);
 
     expect(controller.appsFor(system: false).map((a) => a.sizeBytes), [
       1,

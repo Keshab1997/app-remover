@@ -20,7 +20,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   final AppsController _apps = AppsController();
-  late final TabController _tabs = TabController(length: 2, vsync: this);
+  late final TabController _tabs = TabController(
+    length: 2,
+    vsync: this,
+    // Where the user left off yesterday, not where the widget was written.
+    initialIndex: AppSettings.systemTab.value ? 1 : 0,
+  );
   final TextEditingController _search = TextEditingController();
   bool _searching = false;
 

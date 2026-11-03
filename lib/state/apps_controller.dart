@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import '../models/app_info.dart';
 import '../services/native_apps.dart';
+import '../services/settings.dart';
 
 /// Why the list could not be shown. The words belong to the widget layer:
 /// only `AppLocalizations` knows which language to say them in (docs/10).
@@ -20,8 +21,11 @@ class AppsController extends ChangeNotifier {
   bool _loading = true;
   AppLoadFailure? _failure;
   String _query = '';
-  SortField _sortField = SortField.name;
-  bool _ascending = true;
+  // Largest first: the list exists so the user can find what to remove, and
+  // size is the ordering that answers that. Both are restored from the store,
+  // so a person who sorts differently once keeps it (docs/12 P1-6).
+  SortField _sortField = AppSettings.sortField.value;
+  bool _ascending = AppSettings.sortAscending.value;
   final Set<String> _selected = {};
   int _freeRam = 0;
   int _totalRam = 0;
@@ -59,13 +63,14 @@ class AppsController extends ChangeNotifier {
   /// the list - the tab labels, "select all" - all agree on one answer.
   /// Reading `TabController.index` at tap time is not enough: mid-swipe it
   /// can still name the page being scrolled away from (docs/12 P0-5).
-  bool _systemTab = false;
+  bool _systemTab = AppSettings.systemTab.value;
   bool get systemTab => _systemTab;
 
   void setSystemTab(bool value) {
     if (_systemTab == value) return;
     _systemTab = value;
     notifyListeners();
+    unawaited(AppSettings.setSystemTab(value));
   }
 
   /// Everything the current tab shows, query and sort applied.
@@ -116,12 +121,17 @@ class AppsController extends ChangeNotifier {
     _sortField = field;
     if (ascending != null) _ascending = ascending;
     notifyListeners();
+    _rememberSort();
   }
 
   void toggleSortOrder() {
     _ascending = !_ascending;
     notifyListeners();
+    _rememberSort();
   }
+
+  void _rememberSort() =>
+      unawaited(AppSettings.setSort(_sortField, _ascending));
 
   void toggleSelected(String packageName) {
     if (!_selected.remove(packageName)) {
