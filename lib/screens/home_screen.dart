@@ -162,17 +162,11 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _body() {
     final l10n = AppLocalizations.of(context);
-    if (_apps.loading) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text(l10n.loadingApps),
-          ],
-        ),
-      );
+    // Only the first load has nothing to show. A later refresh keeps the rows
+    // on screen under the spinner, so the list never goes blank mid-session
+    // (docs/12 P0-4).
+    if (_apps.loading && _apps.installedCount == 0) {
+      return const _LoadingList();
     }
     if (_apps.failure != null) {
       return _refreshable(
@@ -567,6 +561,177 @@ class _HomeScreenState extends State<HomeScreen>
   void _openSettings() {
     Navigator.of(context)
         .push(MaterialPageRoute<void>(builder: (_) => const SettingsScreen()));
+  }
+}
+
+/// Rows in the shape of the real list while the first `listApps` is in flight.
+///
+/// A centred spinner says "something is happening"; a skeleton says how many
+/// things and where they will land, so the first frame is never an empty pane.
+/// The pulse is one AnimationController - a shimmer package is a lot of
+/// dependency to dress up eight grey rectangles.
+class _LoadingList extends StatefulWidget {
+  const _LoadingList();
+
+  @override
+  State<_LoadingList> createState() => _LoadingListState();
+}
+
+class _LoadingListState extends State<_LoadingList>
+    with TickerProviderStateMixin {
+  late final AnimationController _pulse = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1100),
+  );
+
+  /// Started from didChangeDependencies, not initState: reading MediaQuery
+  /// before the first build is an assertion, and it has to be re-read anyway
+  /// if the user flips "reduce motion" while the app is open.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    if (reduceMotion) {
+      _pulse.stop();
+      _pulse.value = 0.7;
+    } else if (!_pulse.isAnimating) {
+      _pulse.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    return Column(
+      children: [
+        Expanded(
+          // Fake rows hold no information: keep them out of the a11y tree and
+          // out of the way of a real gesture.
+          child: ExcludeSemantics(
+            child: ListView.builder(
+              padding: const EdgeInsets.only(top: 8),
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 8,
+              itemBuilder: (context, index) => _SkeletonTile(
+                index: index,
+                color: scheme.surfaceContainerHighest,
+                animation: _pulse,
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Text(
+            l10n.loadingApps,
+            style: Theme.of(context).textTheme.bodySmall
+                ?.copyWith(color: scheme.onSurfaceVariant),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// One grey row: the same metrics as [AppTile], so nothing shifts when the
+/// real rows replace it.
+class _SkeletonTile extends StatelessWidget {
+  const _SkeletonTile({
+    required this.index,
+    required this.color,
+    required this.animation,
+  });
+
+  final int index;
+  final Color color;
+  final Animation<double> animation;
+
+  static const _titleWidths = [0.55, 0.42, 0.63, 0.38, 0.50, 0.60, 0.45, 0.35];
+  static const _subWidths = [0.32, 0.44, 0.28, 0.40, 0.36, 0.30, 0.42, 0.26];
+
+  @override
+  Widget build(BuildContext context) {
+    final slot = index % _titleWidths.length;
+    final width = MediaQuery.sizeOf(context).width;
+    // Rows breathe out of step with each other, which reads as progress;
+    // Interval keeps that inside the one shared controller.
+    final begin = index * 0.03;
+    final curved = CurvedAnimation(
+      parent: animation,
+      curve: Interval(begin, begin + 0.78),
+    );
+    return FadeTransition(
+      opacity: Tween<double>(begin: 0.35, end: 0.85).animate(curved),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
+          child: Row(
+            children: [
+              _SkeletonBlock(size: 48, radius: 12, color: color),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _SkeletonBlock(
+                      width: width * _titleWidths[slot],
+                      height: 14,
+                      radius: 4,
+                      color: color,
+                    ),
+                    const SizedBox(height: 6),
+                    _SkeletonBlock(
+                      width: width * _subWidths[slot],
+                      height: 10,
+                      radius: 4,
+                      color: color,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              _SkeletonBlock(size: 24, radius: 12, color: color),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SkeletonBlock extends StatelessWidget {
+  const _SkeletonBlock({
+    this.size,
+    this.width,
+    this.height,
+    required this.radius,
+    required this.color,
+  }) : assert(size != null || (width != null && height != null));
+
+  final double? size;
+  final double? width;
+  final double? height;
+  final double radius;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size ?? width,
+      height: size ?? height,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(radius),
+      ),
+    );
   }
 }
 

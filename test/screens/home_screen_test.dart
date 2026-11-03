@@ -38,6 +38,48 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  testWidgets('the first frame is a skeleton, not a blank pane', (
+    tester,
+  ) async {
+    // Answer the first listApps only after a beat, so the loading state is
+    // still on screen when we look at it (docs/12 P0-4).
+    var release = false;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          if (call.method == 'listApps') {
+            while (!release) {
+              await Future<void>.delayed(const Duration(milliseconds: 5));
+            }
+            return <Map<String, dynamic>>[];
+          }
+          if (call.method == 'freeMemory') {
+            return const {'available': 1000, 'total': 4000};
+          }
+          return null;
+        });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const HomeScreen(),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Loading apps…'), findsOneWidget);
+    expect(
+      find.byType(Card),
+      findsAtLeastNWidgets(6),
+      reason: 'rows shaped like the real list',
+    );
+
+    release = true;
+    await tester.pumpAndSettle();
+    expect(find.text('Loading apps…'), findsNothing);
+    expect(find.text('Apps not found'), findsOneWidget);
+  });
+
   testWidgets('an empty list is still pull-to-refreshable', (tester) async {
     await open(tester);
 
