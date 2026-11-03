@@ -27,6 +27,7 @@ void main() {
           return switch (call.method) {
             'listApps' => rows,
             'freeMemory' => const {'available': 1000, 'total': 4000},
+            'freeStorage' => const {'available': 8000, 'total': 16000},
             _ => null,
           };
         });
@@ -309,6 +310,9 @@ void main() {
 
     // The bar used to ship its own 18 px refresh next to the app bar's.
     expect(find.byIcon(Icons.refresh), findsOneWidget);
+    // Both facts are visible at a glance, without opening the sheet.
+    expect(find.text('Free RAM'), findsOneWidget);
+    expect(find.text('Free storage'), findsOneWidget);
 
     await tester.tap(find.text('Free RAM'));
     await tester.pumpAndSettle();
@@ -319,6 +323,13 @@ void main() {
     );
     expect(find.text('RAM used'), findsOneWidget);
     expect(find.text('Total RAM'), findsOneWidget);
+    expect(find.text('Phone storage'), findsOneWidget);
+    expect(find.text('Storage used'), findsOneWidget);
+    expect(find.text('Total storage'), findsOneWidget);
+    expect(
+      find.text('Disk space for apps and files — not RAM'),
+      findsOneWidget,
+    );
     // 4000 - 1000 bytes from the mocked ActivityManager.
     expect(find.text('2.9 KB / 3.9 KB used'), findsOneWidget);
   });
@@ -588,6 +599,45 @@ void main() {
     // The fake device reports the system dialog as declined, which is now
     // visible instead of a silent return to the list.
     expect(find.text('No apps were removed'), findsOneWidget);
+  });
+
+  testWidgets('a successful uninstall shows a card with the freed space', (
+    tester,
+  ) async {
+    rows = [
+      {
+        'packageName': 'com.example.maps',
+        'label': 'Maps',
+        'isSystem': false,
+        'sizeBytes': 100,
+        'firstInstallTime': 1,
+        'lastUpdateTime': 1,
+        'versionName': '1.0',
+        'versionCode': 1,
+      },
+    ];
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          return switch (call.method) {
+            'listApps' => rows,
+            'freeMemory' => const {'available': 1000, 'total': 4000},
+            'freeStorage' => const {'available': 8000, 'total': 16000},
+            'uninstall' => true,
+            _ => null,
+          };
+        });
+    await open(tester);
+
+    await tester.longPress(find.text('Maps'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Uninstall'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 700));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Freed 100 B from one app'), findsOneWidget);
+    expect(find.text('Clean-up complete'), findsOneWidget);
+    expect(find.byIcon(Icons.check_circle), findsOneWidget);
   });
 
   testWidgets('search remembers what you typed', (tester) async {

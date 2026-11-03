@@ -130,6 +130,16 @@ class NativeApps {
     );
   }
 
+  /// Returns (available, total) bytes of internal phone storage — disk space
+  /// for apps and files, not RAM. Zeroes when the platform cannot answer.
+  static Future<({int available, int total})> freeStorage() async {
+    final map = await _channel.invokeMapMethod<String, dynamic>('freeStorage');
+    return (
+      available: (map?['available'] as num?)?.toInt() ?? 0,
+      total: (map?['total'] as num?)?.toInt() ?? 0,
+    );
+  }
+
   static Future<({String name, int code})> appVersion() async {
     final map = await _channel.invokeMapMethod<String, dynamic>('appVersion');
     return (

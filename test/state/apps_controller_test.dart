@@ -81,6 +81,7 @@ void main() {
           return switch (call.method) {
             'listApps' => rows,
             'freeMemory' => const {'available': 1000, 'total': 4000},
+            'freeStorage' => const {'available': 8000, 'total': 16000},
             _ => null,
           };
         });
@@ -106,6 +107,31 @@ void main() {
     ]);
     expect(controller.freeRam, 1000);
     expect(controller.totalRam, 4000);
+    expect(controller.freeStorage, 8000);
+    expect(controller.totalStorage, 16000);
+  });
+
+  test('the sheet refresh reads RAM and storage together', () async {
+    await controller.load();
+
+    var storageRead = false;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          if (call.method == 'freeStorage') {
+            storageRead = true;
+            return {'available': 9000, 'total': 16000};
+          }
+          if (call.method == 'freeMemory') {
+            return {'available': 500, 'total': 4000};
+          }
+          return null;
+        });
+
+    await controller.refreshMemory();
+
+    expect(storageRead, isTrue);
+    expect(controller.freeRam, 500);
+    expect(controller.freeStorage, 9000);
   });
 
   test('a channel failure is reported without throwing', () async {
@@ -331,20 +357,23 @@ void main() {
     expect(controller.selectedSize, 0);
   });
 
-  test('a settled list is reused until a list input actually changes', () async {
-    await controller.load();
-    final first = controller.appsFor(system: false);
+  test(
+    'a settled list is reused until a list input actually changes',
+    () async {
+      await controller.load();
+      final first = controller.appsFor(system: false);
 
-    // Two tab counts, select-all and the visible list all ask in one build.
-    expect(identical(first, controller.appsFor(system: false)), isTrue);
-    // A selection tap repaints the screen; it must not re-sort 200 apps.
-    controller.toggleSelected('com.example.maps');
-    expect(identical(first, controller.appsFor(system: false)), isTrue);
+      // Two tab counts, select-all and the visible list all ask in one build.
+      expect(identical(first, controller.appsFor(system: false)), isTrue);
+      // A selection tap repaints the screen; it must not re-sort 200 apps.
+      controller.toggleSelected('com.example.maps');
+      expect(identical(first, controller.appsFor(system: false)), isTrue);
 
-    controller.setQuery('map');
-    expect(identical(first, controller.appsFor(system: false)), isFalse);
-    expect(controller.appsFor(system: false).length, 1);
-  });
+      controller.setQuery('map');
+      expect(identical(first, controller.appsFor(system: false)), isFalse);
+      expect(controller.appsFor(system: false).length, 1);
+    },
+  );
 
   test('selection drops packages that are gone after a reload', () async {
     await controller.load();

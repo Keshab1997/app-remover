@@ -43,7 +43,7 @@
   "cancel": "Cancel",
   "settings": "Settings",
   "refresh": "Refresh",
-  "refreshMemory": "Refresh RAM",
+  "refreshMemory": "Refresh RAM & storage",
   "selectAll": "Select all",
   "cancelSelection": "Cancel selection",
   "selectedCount": "{count} selected",
@@ -121,8 +121,8 @@
   "light": "Light",
   "dark": "Dark",
   "statusBarToggle": "Status bar notification",
-  "statusBarOn": "Free RAM in the tray, refreshed with the list",
-  "statusBarOff": "Show free RAM in the tray",
+  "statusBarOn": "Free RAM & storage in the tray, refreshed with the list",
+  "statusBarOff": "Show free RAM & storage in the tray",
   "notificationsOffTitle": "Notifications are off",
   "notificationsOffBody": "Allow notifications for Goodbye Apps in system settings, then turn this back on.",
   "openSettings": "Open settings",
@@ -218,5 +218,19 @@
   "dismiss": "Dismiss",
   "clearRecentSearches": "Clear recent searches",
   "ramNotStorage": "RAM (working memory) — not storage space",
-  "madeBy": "Made by KeshabStudios"
+  "madeBy": "Made by KeshabStudios",
+  "storageFree": "Free storage",
+  "storageUsed": "Storage used",
+  "storageTotal": "Total storage",
+  "phoneStorage": "Phone storage",
+  "storageNotRam": "Disk space for apps and files — not RAM",
+  "uninstallDone": "Clean-up complete",
+  "uninstallKept": "{count} kept",
+  "@uninstallKept": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

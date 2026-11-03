@@ -60,6 +60,7 @@ void main() {
         en.appsShownOf(1, 2),
         en.uninstallSummaryOne('12 MB'),
         en.uninstallSummaryMany('1.4 GB', 6),
+        en.uninstallKept(2),
       ],
       [
         '3 selected',
@@ -71,6 +72,7 @@ void main() {
         'Showing 1 of 2 apps',
         'Freed 12 MB from one app',
         'Freed 1.4 GB from 6 apps',
+        '2 kept',
       ],
     );
 

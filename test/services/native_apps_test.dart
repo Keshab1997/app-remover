@@ -17,6 +17,8 @@ void main() {
             case 'getSizeBreakdown':
             case 'hasUsageAccess':
             case 'usageAccessSettings':
+            case 'freeStorage':
+            case 'freeMemory':
               return answer;
           }
           return null;
@@ -65,6 +67,18 @@ void main() {
       cache: 0,
       total: 12,
     ));
+  });
+
+  test('freeStorage reads disk bytes, not RAM', () async {
+    answer = {'available': 8000, 'total': 16000};
+
+    expect(await NativeApps.freeStorage(), (available: 8000, total: 16000));
+  });
+
+  test('a missing storage answer is zero rather than a crash', () async {
+    answer = null;
+
+    expect(await NativeApps.freeStorage(), (available: 0, total: 0));
   });
 
   test(

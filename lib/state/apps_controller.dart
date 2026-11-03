@@ -13,13 +13,7 @@ enum AppLoadFailure { listUnavailable }
 /// An installed app plus the primitive keys the list needs: a lower-cased name
 /// for sorting, a lower-cased label/package pair for searching, and the newest
 /// install/update stamp as an int instead of two `DateTime` objects.
-typedef _AppRow =
-    ({
-      AppInfo app,
-      String name,
-      int date,
-      String search,
-    });
+typedef _AppRow = ({AppInfo app, String name, int date, String search});
 
 class AppsController extends ChangeNotifier {
   AppsController({DateTime Function()? clock})
@@ -30,6 +24,7 @@ class AppsController extends ChangeNotifier {
   StreamSubscription<String>? _subscription;
 
   List<AppInfo> _all = [];
+
   /// One row per installed app with its sort/search keys already computed.
   /// `appsFor` used to call `toLowerCase()` and build two `DateTime`s *inside*
   /// the sort comparator, so a 200-app list allocated thousands of objects on
@@ -58,6 +53,8 @@ class AppsController extends ChangeNotifier {
   final Set<String> _selected = {};
   int _freeRam = 0;
   int _totalRam = 0;
+  int _freeStorage = 0;
+  int _totalStorage = 0;
 
   bool get loading => _loading;
   AppLoadFailure? get failure => _failure;
@@ -68,6 +65,8 @@ class AppsController extends ChangeNotifier {
   bool get selectionMode => _selected.isNotEmpty;
   int get freeRam => _freeRam;
   int get totalRam => _totalRam;
+  int get freeStorage => _freeStorage;
+  int get totalStorage => _totalStorage;
   int get installedCount => _all.length;
 
   /// Whether the last-opened stamps came with the list, i.e. whether the
@@ -158,14 +157,15 @@ class AppsController extends ChangeNotifier {
     _failure = null;
     notifyListeners();
     try {
-      // Three independent channel reads. They used to run one after another,
-      // so the two informational round trips sat on the critical path of the
+      // Four independent channel reads. They used to run one after another,
+      // so the informational round trips sat on the critical path of the
       // first frame for no reason. `Future.wait` also handles the case where
       // more than one of them fails.
       final results = await Future.wait<dynamic>([
         NativeApps.listApps(),
         _hasUsageAccess(),
         NativeApps.freeMemory(),
+        NativeApps.freeStorage(),
       ]);
       final apps = results[0] as List<AppInfo>;
       _all = apps;
@@ -186,6 +186,7 @@ class AppsController extends ChangeNotifier {
           .toList(growable: false);
       _usageAvailable = results[1] as bool;
       _setMemory(results[2] as ({int available, int total}));
+      _setStorage(results[3] as ({int available, int total}));
       // Access revoked since the chip was tapped must not leave the list
       // looking empty for a reason the user cannot act on.
       if (!_usageAvailable && _filter == AppFilter.unused) _filter = null;
@@ -219,12 +220,24 @@ class AppsController extends ChangeNotifier {
     _totalRam = memory.total;
   }
 
+  void _setStorage(({int available, int total}) storage) {
+    _freeStorage = storage.available;
+    _totalStorage = storage.total;
+  }
+
+  /// One tap refreshes both facts the bottom bar shows. Neither readout is
+  /// allowed to fail the app: a device with no answer simply shows zero.
   Future<void> refreshMemory() async {
     try {
-      _setMemory(await NativeApps.freeMemory());
+      final results = await Future.wait<dynamic>([
+        NativeApps.freeMemory(),
+        NativeApps.freeStorage(),
+      ]);
+      _setMemory(results[0] as ({int available, int total}));
+      _setStorage(results[1] as ({int available, int total}));
       notifyListeners();
     } catch (_) {
-      // Ignore: memory readout is informational only.
+      // Ignore: both readouts are informational only.
     }
   }
 

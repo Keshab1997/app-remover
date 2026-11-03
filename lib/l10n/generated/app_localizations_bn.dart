@@ -83,7 +83,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get refresh => 'রিফ্রেশ';
 
   @override
-  String get refreshMemory => 'RAM রিফ্রেশ করুন';
+  String get refreshMemory => 'RAM ও স্টোরেজ রিফ্রেশ করুন';
 
   @override
   String get selectAll => 'সব নির্বাচন করুন';
@@ -187,10 +187,11 @@ class AppLocalizationsBn extends AppLocalizations {
   String get statusBarToggle => 'স্ট্যাটাস বার নোটিফিকেশন';
 
   @override
-  String get statusBarOn => 'ট্রে-তে ফ্রি RAM, লিস্ট রিফ্রেশের সাথে আপডেট হয়';
+  String get statusBarOn =>
+      'ট্রে-তে ফ্রি RAM ও স্টোরেজ, লিস্ট রিফ্রেশের সাথে আপডেট হয়';
 
   @override
-  String get statusBarOff => 'ট্রে-তে ফ্রি RAM দেখান';
+  String get statusBarOff => 'ট্রে-তে ফ্রি RAM ও স্টোরেজ দেখান';
 
   @override
   String get notificationsOffTitle => 'নোটিফিকেশন বন্ধ আছে';
@@ -345,4 +346,27 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get madeBy => 'তৈরি করেছে KeshabStudios';
+
+  @override
+  String get storageFree => 'খালি স্টোরেজ';
+
+  @override
+  String get storageUsed => 'স্টোরেজ ব্যবহৃত';
+
+  @override
+  String get storageTotal => 'মোট স্টোরেজ';
+
+  @override
+  String get phoneStorage => 'ফোনের স্টোরেজ';
+
+  @override
+  String get storageNotRam => 'অ্যাপ ও ফাইলের জায়গা — RAM নয়';
+
+  @override
+  String get uninstallDone => 'পরিষ্কার সম্পন্ন';
+
+  @override
+  String uninstallKept(int count) {
+    return '$countটি রাখা হয়েছে';
+  }
 }

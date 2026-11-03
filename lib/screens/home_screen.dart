@@ -447,7 +447,7 @@ class _HomeScreenState extends State<HomeScreen>
       onTap: () =>
           selecting ? _apps.toggleSelected(app.packageName) : _showActions(app),
       onLongPress: () {
-        HapticFeedback.selectionClick();
+        unawaited(_buzz(HapticFeedback.selectionClick));
         _apps.toggleSelected(app.packageName);
       },
       onSelectedChanged: (_) => _apps.toggleSelected(app.packageName),
@@ -615,6 +615,8 @@ class _HomeScreenState extends State<HomeScreen>
     final count = _apps.selected.length;
     if (count == 0) return;
     if (count > 1 && _armedCount != count) {
+      // Stage one: arming the bar is a choice, so it gets a light click.
+      unawaited(_buzz(HapticFeedback.selectionClick));
       setState(() => _armedCount = count);
       _armTimer?.cancel();
       _armTimer = Timer(_armWindow, () => setState(_disarm));
@@ -629,29 +631,109 @@ class _HomeScreenState extends State<HomeScreen>
     _armedCount = 0;
   }
 
+  /// Haptics are a nicety, never a gate. A device without a vibrator — or the
+  /// widget-test host, which has no platform plugin — answers this channel
+  /// with MissingPluginException; losing a buzz must not lose the toast.
+  Future<void> _buzz(Future<void> Function() pattern) async {
+    try {
+      await pattern();
+    } catch (_) {
+      // No feedback hardware: carry on.
+    }
+  }
+
   Future<void> _runUninstall() async {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    // Stage two: the tap registers before the system dialogs begin.
+    unawaited(_buzz(HapticFeedback.mediumImpact));
     final summary = await _apps.uninstallSelected();
     if (mounted) setState(_disarm);
     if (summary == null) return;
     if (summary.removed == 0) {
-      // Every system dialog was declined: say so instead of closing silently.
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.uninstallNothingRemoved)),
+      // Every system dialog was declined: a soft acknowledgement, not a cheer.
+      unawaited(_buzz(HapticFeedback.lightImpact));
+      _uninstallToast(
+        messenger: messenger,
+        scheme: scheme,
+        icon: Icons.info_outline,
+        title: l10n.uninstallNothingRemoved,
+        success: false,
       );
       return;
     }
-    await HapticFeedback.mediumImpact();
+    // Stage three: the one heavy thunk for a run that actually freed space.
+    unawaited(_buzz(HapticFeedback.heavyImpact));
     final freed = formatBytes(summary.freedBytes);
     // One or many, told apart in Dart: gen-l10n cannot substitute the "#" of a
     // plural in a message that also takes another placeholder.
+    _uninstallToast(
+      messenger: messenger,
+      scheme: scheme,
+      icon: Icons.check_circle,
+      title: summary.removed == 1
+          ? l10n.uninstallSummaryOne(freed)
+          : l10n.uninstallSummaryMany(freed, summary.removed),
+      subtitle: summary.failed > 0
+          ? l10n.uninstallKept(summary.failed)
+          : l10n.uninstallDone,
+      success: true,
+    );
+  }
+
+  /// Uninstall is the one irreversible thing this app does, so its feedback is
+  /// a floating card with a result and an exception, not a bare line of text.
+  void _uninstallToast({
+    required ScaffoldMessengerState messenger,
+    required ColorScheme scheme,
+    required IconData icon,
+    required String title,
+    required bool success,
+    String? subtitle,
+  }) {
+    final background = success
+        ? scheme.tertiaryContainer
+        : scheme.errorContainer;
+    final foreground = success
+        ? scheme.onTertiaryContainer
+        : scheme.onErrorContainer;
     messenger.showSnackBar(
       SnackBar(
-        content: Text(
-          summary.removed == 1
-              ? l10n.uninstallSummaryOne(freed)
-              : l10n.uninstallSummaryMany(freed, summary.removed),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 96),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: background,
+        duration: const Duration(seconds: 4),
+        content: Row(
+          children: [
+            Icon(icon, color: foreground, size: 26),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: foreground,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  if (subtitle != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(
+                        subtitle,
+                        style: TextStyle(color: foreground, fontSize: 12),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -667,6 +749,10 @@ class _HomeScreenState extends State<HomeScreen>
     final scheme = theme.colorScheme;
     final used = _apps.totalRam - _apps.freeRam;
     final fraction = _apps.totalRam > 0 ? used / _apps.totalRam : 0.0;
+    final storageUsed = _apps.totalStorage - _apps.freeStorage;
+    final storageFraction = _apps.totalStorage > 0
+        ? (storageUsed < 0 ? 0 : storageUsed) / _apps.totalStorage
+        : 0.0;
     final small = theme.textTheme.bodySmall?.copyWith(
       color: scheme.onSurfaceVariant,
     );
@@ -753,6 +839,74 @@ class _HomeScreenState extends State<HomeScreen>
                   backgroundColor: scheme.surfaceContainerHighest,
                 ),
               ),
+              // Disk space is the number an uninstaller actually changes, so
+              // it gets its own compact row. The RAM facts above stay as they
+              // were; both rows live inside the same tappable sheet opener.
+              Container(
+                height: 32,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Tooltip(
+                      message: l10n.storageNotRam,
+                      child: Icon(
+                        Icons.sd_storage_outlined,
+                        size: 14,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        l10n.storageFree,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: small,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        formatBytes(_apps.freeStorage),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    if (_apps.totalStorage > 0) ...[
+                      const SizedBox(width: 12),
+                      Flexible(
+                        child: Text(
+                          l10n.usedOfTotal(
+                            formatBytes(storageUsed),
+                            formatBytes(_apps.totalStorage),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: small,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(width: 6),
+                    Icon(
+                      Icons.chevron_right,
+                      size: 18,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 2,
+                child: LinearProgressIndicator(
+                  value: storageFraction,
+                  minHeight: 2,
+                  color: storageFraction > 0.9 ? scheme.error : scheme.tertiary,
+                  backgroundColor: scheme.surfaceContainerHighest,
+                ),
+              ),
             ],
           ),
         ),
@@ -763,6 +917,7 @@ class _HomeScreenState extends State<HomeScreen>
   Future<void> _showMemorySheet() async {
     final l10n = AppLocalizations.of(context);
     final used = _apps.totalRam - _apps.freeRam;
+    final storageUsed = _apps.totalStorage - _apps.freeStorage;
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -795,6 +950,31 @@ class _HomeScreenState extends State<HomeScreen>
                 leading: const Icon(Icons.sd_storage),
                 title: Text(l10n.memoryTotal),
                 trailing: Text(formatBytes(_apps.totalRam)),
+              ),
+              const Divider(),
+              // Two different numbers, two different meanings: RAM above is
+              // working memory, this is the disk space uninstalling frees.
+              ListTile(
+                title: Text(
+                  l10n.phoneStorage,
+                  style: Theme.of(sheetContext).textTheme.titleMedium,
+                ),
+                subtitle: Text(l10n.storageNotRam),
+              ),
+              ListTile(
+                leading: const Icon(Icons.sd_card),
+                title: Text(l10n.storageFree),
+                trailing: Text(formatBytes(_apps.freeStorage)),
+              ),
+              ListTile(
+                leading: const Icon(Icons.folder_outlined),
+                title: Text(l10n.storageUsed),
+                trailing: Text(formatBytes(storageUsed)),
+              ),
+              ListTile(
+                leading: const Icon(Icons.storage),
+                title: Text(l10n.storageTotal),
+                trailing: Text(formatBytes(_apps.totalStorage)),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -980,7 +1160,7 @@ class _HomeScreenState extends State<HomeScreen>
                       : () async {
                           Navigator.pop(sheetContext);
                           if (await _apps.uninstall(app)) {
-                            await HapticFeedback.mediumImpact();
+                            unawaited(_buzz(HapticFeedback.mediumImpact));
                           }
                         },
                 ),

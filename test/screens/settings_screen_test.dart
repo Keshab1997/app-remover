@@ -37,7 +37,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('the studio credit sits at the bottom in English', (tester) async {
+  testWidgets('the studio credit sits at the bottom in English', (
+    tester,
+  ) async {
     await open(tester, const Locale('en'));
 
     expect(find.text('Made by KeshabStudios'), findsOneWidget);

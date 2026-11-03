@@ -83,7 +83,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get refresh => 'Refresh';
 
   @override
-  String get refreshMemory => 'Refresh RAM';
+  String get refreshMemory => 'Refresh RAM & storage';
 
   @override
   String get selectAll => 'Select all';
@@ -187,10 +187,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusBarToggle => 'Status bar notification';
 
   @override
-  String get statusBarOn => 'Free RAM in the tray, refreshed with the list';
+  String get statusBarOn =>
+      'Free RAM & storage in the tray, refreshed with the list';
 
   @override
-  String get statusBarOff => 'Show free RAM in the tray';
+  String get statusBarOff => 'Show free RAM & storage in the tray';
 
   @override
   String get notificationsOffTitle => 'Notifications are off';
@@ -345,4 +346,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get madeBy => 'Made by KeshabStudios';
+
+  @override
+  String get storageFree => 'Free storage';
+
+  @override
+  String get storageUsed => 'Storage used';
+
+  @override
+  String get storageTotal => 'Total storage';
+
+  @override
+  String get phoneStorage => 'Phone storage';
+
+  @override
+  String get storageNotRam => 'Disk space for apps and files — not RAM';
+
+  @override
+  String get uninstallDone => 'Clean-up complete';
+
+  @override
+  String uninstallKept(int count) {
+    return '$count kept';
+  }
 }

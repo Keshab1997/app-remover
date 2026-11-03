@@ -17,9 +17,11 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.os.Process
+import android.os.StatFs
 import android.os.storage.StorageManager
 import android.provider.Settings
 import android.util.LruCache
@@ -191,6 +193,8 @@ class MainActivity : FlutterActivity() {
                     }
 
                     "freeMemory" -> result.success(freeMemory())
+
+                    "freeStorage" -> result.success(freeStorage())
 
                     "appVersion" -> {
                         val info = packageManager.getPackageInfo(packageName, 0)
@@ -553,6 +557,20 @@ class MainActivity : FlutterActivity() {
             "total" to info.totalMem,
             "lowMemory" to if (info.lowMemory) 1L else 0L
         )
+    }
+
+    /** Free / total bytes on the internal data partition: disk space for apps
+     * and files. Unlike usage-access sizes this needs no permission at all,
+     * so the bar can always answer "how much storage is free?". */
+    private fun freeStorage(): Map<String, Long> {
+        return try {
+            val stat = StatFs(Environment.getDataDirectory().path)
+            val available = stat.availableBlocksLong * stat.blockSizeLong
+            val total = stat.blockCountLong * stat.blockSizeLong
+            mapOf("available" to available, "total" to total)
+        } catch (_: Throwable) {
+            mapOf("available" to 0L, "total" to 0L)
+        }
     }
 
     // --------------------------------------------------------------- events

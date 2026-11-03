@@ -23,7 +23,7 @@
   "cancel": "বাতিল",
   "settings": "সেটিংস",
   "refresh": "রিফ্রেশ",
-  "refreshMemory": "RAM রিফ্রেশ করুন",
+  "refreshMemory": "RAM ও স্টোরেজ রিফ্রেশ করুন",
   "selectAll": "সব নির্বাচন করুন",
   "cancelSelection": "নির্বাচন বাতিল",
   "selectedCount": "{count}টি নির্বাচিত",
@@ -54,8 +54,8 @@
   "light": "লাইট",
   "dark": "ডার্ক",
   "statusBarToggle": "স্ট্যাটাস বার নোটিফিকেশন",
-  "statusBarOn": "ট্রে-তে ফ্রি RAM, লিস্ট রিফ্রেশের সাথে আপডেট হয়",
-  "statusBarOff": "ট্রে-তে ফ্রি RAM দেখান",
+  "statusBarOn": "ট্রে-তে ফ্রি RAM ও স্টোরেজ, লিস্ট রিফ্রেশের সাথে আপডেট হয়",
+  "statusBarOff": "ট্রে-তে ফ্রি RAM ও স্টোরেজ দেখান",
   "notificationsOffTitle": "নোটিফিকেশন বন্ধ আছে",
   "notificationsOffBody": "সিস্টেম সেটিংসে Goodbye Apps-এর নোটিফিকেশন চালু করে, তারপর এটা আবার অন করুন।",
   "openSettings": "সেটিংস খুলুন",
@@ -144,5 +144,12 @@
   "dismiss": "মুছে দিন",
   "clearRecentSearches": "সাম্প্রতিক সার্চ মুছুন",
   "ramNotStorage": "RAM (কাজের মেমোরি) — স্টোরেজ নয়",
-  "madeBy": "তৈরি করেছে KeshabStudios"
+  "madeBy": "তৈরি করেছে KeshabStudios",
+  "storageFree": "খালি স্টোরেজ",
+  "storageUsed": "স্টোরেজ ব্যবহৃত",
+  "storageTotal": "মোট স্টোরেজ",
+  "phoneStorage": "ফোনের স্টোরেজ",
+  "storageNotRam": "অ্যাপ ও ফাইলের জায়গা — RAM নয়",
+  "uninstallDone": "পরিষ্কার সম্পন্ন",
+  "uninstallKept": "{count}টি রাখা হয়েছে"
 }

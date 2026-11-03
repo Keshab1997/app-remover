@@ -239,7 +239,7 @@ abstract class AppLocalizations {
   /// No description provided for @refreshMemory.
   ///
   /// In en, this message translates to:
-  /// **'Refresh RAM'**
+  /// **'Refresh RAM & storage'**
   String get refreshMemory;
 
   /// No description provided for @selectAll.
@@ -425,13 +425,13 @@ abstract class AppLocalizations {
   /// No description provided for @statusBarOn.
   ///
   /// In en, this message translates to:
-  /// **'Free RAM in the tray, refreshed with the list'**
+  /// **'Free RAM & storage in the tray, refreshed with the list'**
   String get statusBarOn;
 
   /// No description provided for @statusBarOff.
   ///
   /// In en, this message translates to:
-  /// **'Show free RAM in the tray'**
+  /// **'Show free RAM & storage in the tray'**
   String get statusBarOff;
 
   /// No description provided for @notificationsOffTitle.
@@ -703,6 +703,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Made by KeshabStudios'**
   String get madeBy;
+
+  /// No description provided for @storageFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free storage'**
+  String get storageFree;
+
+  /// No description provided for @storageUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage used'**
+  String get storageUsed;
+
+  /// No description provided for @storageTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total storage'**
+  String get storageTotal;
+
+  /// No description provided for @phoneStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone storage'**
+  String get phoneStorage;
+
+  /// No description provided for @storageNotRam.
+  ///
+  /// In en, this message translates to:
+  /// **'Disk space for apps and files — not RAM'**
+  String get storageNotRam;
+
+  /// No description provided for @uninstallDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean-up complete'**
+  String get uninstallDone;
+
+  /// No description provided for @uninstallKept.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} kept'**
+  String uninstallKept(int count);
 }
 
 class _AppLocalizationsDelegate

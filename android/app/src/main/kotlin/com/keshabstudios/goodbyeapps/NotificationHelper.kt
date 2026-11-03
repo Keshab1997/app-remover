@@ -7,12 +7,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
+import android.os.Environment
+import android.os.StatFs
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 
 /**
  * The "Status bar notification" of docs/06: one ongoing, silent notification
- * that reports free memory and opens the app on tap.
+ * that reports free RAM and free phone storage and opens the app on tap.
  *
  * Deliberately a plain notification and not a foreground service — no
  * FOREGROUND_SERVICE permission, no service-type justification for Play, and
@@ -47,7 +49,7 @@ object NotificationHelper {
             "Status bar",
             NotificationManager.IMPORTANCE_LOW,
         ).apply {
-            description = "Shows free memory and quick access"
+            description = "Shows free RAM, free storage and quick access"
             setShowBadge(false)
         }
         manager.createNotificationChannel(channel)
@@ -55,6 +57,10 @@ object NotificationHelper {
 
     fun show(context: Context, freeBytes: Long, totalBytes: Long) {
         ensureChannel(context)
+        // Read disk space here, not at the call sites: the tray is refreshed
+        // from four places (settings toggle, permission result, boot receiver,
+        // list refresh) and none of them should be able to forget this half.
+        val (storageFreeBytes, storageTotalBytes) = freeStorage()
 
         val openIntent = PendingIntent.getActivity(
             context,
@@ -68,8 +74,16 @@ object NotificationHelper {
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             // A notification icon must be white on transparent, never the logo.
             .setSmallIcon(R.drawable.ic_stat_memory)
-            .setContentTitle("Free memory")
-            .setContentText("${format(freeBytes)} of ${format(totalBytes)}")
+            // Say RAM out loud: the app also lists app *sizes*, so bare
+            // "memory" was read as storage. The expanded view spells out both.
+            .setContentTitle("Free RAM ${format(freeBytes)}")
+            .setContentText("Storage free ${format(storageFreeBytes)}")
+            .setStyle(
+                NotificationCompat.BigTextStyle().bigText(
+                    "Free RAM ${format(freeBytes)} of ${format(totalBytes)}\n" +
+                        "Free storage ${format(storageFreeBytes)} of ${format(storageTotalBytes)}"
+                )
+            )
             .setContentIntent(openIntent)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
@@ -87,6 +101,19 @@ object NotificationHelper {
 
     fun hide(context: Context) {
         NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID)
+    }
+
+    /** Free / total bytes on the internal data partition. Needs no permission. */
+    private fun freeStorage(): Pair<Long, Long> {
+        return try {
+            val stat = StatFs(Environment.getDataDirectory().path)
+            Pair(
+                stat.availableBlocksLong * stat.blockSizeLong,
+                stat.blockCountLong * stat.blockSizeLong,
+            )
+        } catch (_: Throwable) {
+            Pair(0L, 0L)
+        }
     }
 
     private fun format(bytes: Long): String {
