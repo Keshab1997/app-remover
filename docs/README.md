@@ -17,6 +17,7 @@ spec আছে। প্রতিটা doc-এ **কী বানাতে হ�
 | 09 | [Home screen shortcut](09-home-screen-shortcut.md) | যেকোনো app-এর pinned shortcut | না | ১–২ ঘণ্টা |
 | 10 | [Bangla localization](10-bangla-localization.md) | `app_bn.arb`, সব string extract | না | ৩ ঘণ্টা |
 | 11 | [Ads & Remove Ads](11-ads-and-iap.md) | AdMob + one-time purchase (original-এ ছিল) | না | ১ দিন |
+| 12 | [UX & design pass](12-ux-and-design-pass.md) | Empty/refresh dead-end, freed-space feedback, skeleton, no-usage chips, selection pattern, a11y | না | ১–২ দিন |
 
 ## Suggested order
 
