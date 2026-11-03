@@ -11,6 +11,7 @@ class AppTile extends StatelessWidget {
     super.key,
     required this.app,
     required this.selected,
+    required this.selecting,
     required this.onTap,
     required this.onLongPress,
     required this.onSelectedChanged,
@@ -18,6 +19,12 @@ class AppTile extends StatelessWidget {
 
   final AppInfo app;
   final bool selected;
+
+  /// Whether the list is in selection mode. Out of it there is no box to
+  /// tick - the row is either a thing to open or a thing to remove, and an
+  /// always-on Checkbox made every row ask which of the two it was
+  /// (docs/12 P1-9).
+  final bool selecting;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
   final ValueChanged<bool> onSelectedChanged;
@@ -87,11 +94,12 @@ class AppTile extends StatelessWidget {
                   ],
                 ),
               ),
-              Checkbox(
-                value: selected,
-                onChanged: (value) => onSelectedChanged(value ?? false),
-                shape: const CircleBorder(),
-              ),
+              if (selecting)
+                Checkbox(
+                  value: selected,
+                  onChanged: (value) => onSelectedChanged(value ?? false),
+                  shape: const CircleBorder(),
+                ),
             ],
           ),
         ),

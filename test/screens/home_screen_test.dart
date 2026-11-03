@@ -229,6 +229,54 @@ void main() {
     expect(find.text('Showing 1 of 2 apps'), findsOneWidget);
   });
 
+  testWidgets(
+    'no checkbox to tick while browsing, tap toggles once selecting',
+    (tester) async {
+      rows = [
+        {
+          'packageName': 'com.example.maps',
+          'label': 'Maps',
+          'isSystem': false,
+          'sizeBytes': 100,
+          'firstInstallTime': 1,
+          'lastUpdateTime': 1,
+          'versionName': '1.0',
+          'versionCode': 1,
+        },
+        {
+          'packageName': 'com.example.games',
+          'label': 'Games',
+          'isSystem': false,
+          'sizeBytes': 100,
+          'firstInstallTime': 1,
+          'lastUpdateTime': 1,
+          'versionName': '1.0',
+          'versionCode': 1,
+        },
+      ];
+      await open(tester);
+
+      expect(
+        find.byType(Checkbox),
+        findsNothing,
+        reason: 'a row is either opened or selected, not both at once',
+      );
+
+      await tester.longPress(find.text('Maps'));
+      await tester.pumpAndSettle();
+      expect(find.byType(Checkbox), findsNWidgets(2));
+      expect(find.text('1 selected'), findsOneWidget);
+
+      await tester.tap(find.text('Games'));
+      await tester.pumpAndSettle();
+      expect(find.text('2 selected'), findsOneWidget);
+
+      await tester.tap(find.text('Games'));
+      await tester.pumpAndSettle();
+      expect(find.text('1 selected'), findsOneWidget);
+    },
+  );
+
   testWidgets('an empty list is still pull-to-refreshable', (tester) async {
     await open(tester);
 

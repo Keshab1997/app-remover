@@ -280,11 +280,20 @@ class _HomeScreenState extends State<HomeScreen>
               itemCount: apps.length,
               itemBuilder: (context, index) {
                 final app = apps[index];
+                final selecting = _apps.selectionMode;
                 return AppTile(
                   app: app,
                   selected: _apps.selected.contains(app.packageName),
-                  onTap: () => _showActions(app),
-                  onLongPress: () => _apps.toggleSelected(app.packageName),
+                  selecting: selecting,
+                  // In selection mode a tap means the box; out of it, the
+                  // sheet. Long-press is the only way in, and it is felt.
+                  onTap: () => selecting
+                      ? _apps.toggleSelected(app.packageName)
+                      : _showActions(app),
+                  onLongPress: () {
+                    HapticFeedback.selectionClick();
+                    _apps.toggleSelected(app.packageName);
+                  },
                   onSelectedChanged: (_) =>
                       _apps.toggleSelected(app.packageName),
                 );
