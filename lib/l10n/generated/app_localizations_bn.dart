@@ -267,4 +267,15 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get uninstallNothingRemoved => 'কোনো অ্যাপ সরানো হয়নি';
+
+  @override
+  String get tabUserAppsLabel => 'ইউজার অ্যাপ';
+
+  @override
+  String get tabSystemAppsLabel => 'সিস্টেম অ্যাপ';
+
+  @override
+  String selectAllInTab(Object count, Object tab) {
+    return '$tab-এ $countটি বেছে নিন';
+  }
 }

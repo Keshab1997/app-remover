@@ -169,5 +169,8 @@
       }
     }
   },
-  "uninstallNothingRemoved": "No apps were removed"
+  "uninstallNothingRemoved": "No apps were removed",
+  "tabUserAppsLabel": "User apps",
+  "tabSystemAppsLabel": "System apps",
+  "selectAllInTab": "Select all {count} in {tab}"
 }

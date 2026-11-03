@@ -80,6 +80,67 @@ void main() {
     expect(find.text('Apps not found'), findsOneWidget);
   });
 
+  testWidgets('select all takes the tab on screen, with its count', (
+    tester,
+  ) async {
+    rows = [
+      {
+        'packageName': 'com.example.games',
+        'label': 'Games',
+        'isSystem': false,
+        'sizeBytes': 100,
+        'firstInstallTime': 1,
+        'lastUpdateTime': 1,
+        'versionName': '1.0',
+        'versionCode': 1,
+      },
+      {
+        'packageName': 'com.example.maps',
+        'label': 'Maps',
+        'isSystem': false,
+        'sizeBytes': 100,
+        'firstInstallTime': 1,
+        'lastUpdateTime': 1,
+        'versionName': '1.0',
+        'versionCode': 1,
+      },
+      {
+        'packageName': 'android.systemui',
+        'label': 'SystemUI',
+        'isSystem': true,
+        'sizeBytes': 100,
+        'firstInstallTime': 1,
+        'lastUpdateTime': 1,
+        'versionName': '1.0',
+        'versionCode': 1,
+      },
+    ];
+    await open(tester);
+
+    // Long-press opens selection mode; the toolbar then promises a count for
+    // the tab in view (docs/12 P0-5).
+    await tester.longPress(find.text('Games'));
+    await tester.pumpAndSettle();
+    expect(find.text('1 selected'), findsOneWidget);
+
+    expect(
+      find.byTooltip('Select all 2 in User apps'),
+      findsOneWidget,
+      reason: 'the count in view, not a guess',
+    );
+    await tester.tap(find.byIcon(Icons.select_all));
+    await tester.pumpAndSettle();
+    expect(find.text('2 selected'), findsOneWidget, reason: 'both user apps');
+
+    await tester.tap(find.text('System apps (1)'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Select all 1 in System apps'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.select_all));
+    await tester.pumpAndSettle();
+    expect(find.text('3 selected'), findsOneWidget);
+  });
+
   testWidgets('an empty list is still pull-to-refreshable', (tester) async {
     await open(tester);
 

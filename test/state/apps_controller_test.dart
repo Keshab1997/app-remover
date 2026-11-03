@@ -167,6 +167,21 @@ void main() {
     expect(controller.uninstalling, isFalse);
   });
 
+  test('currentApps follows the tab the controller was told about', () async {
+    await controller.load();
+
+    expect(controller.systemTab, isFalse);
+    expect(controller.currentApps.map((a) => a.label), [
+      'Camera',
+      'Games',
+      'Iconless',
+      'Maps',
+    ]);
+
+    controller.setSystemTab(true);
+    expect(controller.currentApps.map((a) => a.label), ['SystemUI']);
+  });
+
   test('name sort ignores case and follows the direction', () async {
     await controller.load();
 

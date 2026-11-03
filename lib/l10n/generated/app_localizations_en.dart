@@ -266,4 +266,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get uninstallNothingRemoved => 'No apps were removed';
+
+  @override
+  String get tabUserAppsLabel => 'User apps';
+
+  @override
+  String get tabSystemAppsLabel => 'System apps';
+
+  @override
+  String selectAllInTab(Object count, Object tab) {
+    return 'Select all $count in $tab';
+  }
 }

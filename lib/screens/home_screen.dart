@@ -28,10 +28,19 @@ class _HomeScreenState extends State<HomeScreen>
   void initState() {
     super.initState();
     _apps.load();
+    _tabs.addListener(_trackTab);
+  }
+
+  /// Follows the page the user is actually on, including the frames of a
+  /// swipe, so "select all" cannot act on the tab they are leaving.
+  void _trackTab() {
+    final value = _tabs.animation?.value ?? _tabs.index.toDouble();
+    _apps.setSystemTab(value.round() == 1);
   }
 
   @override
   void dispose() {
+    _tabs.removeListener(_trackTab);
     _apps.dispose();
     _tabs.dispose();
     _search.dispose();
@@ -72,11 +81,25 @@ class _HomeScreenState extends State<HomeScreen>
           : null,
       actions: _apps.selectionMode
           ? [
-              IconButton(
-                icon: const Icon(Icons.select_all),
-                tooltip: l10n.selectAll,
-                onPressed: () =>
-                    _apps.selectAll(_apps.appsFor(system: _tabs.index == 1)),
+              Builder(
+                builder: (context) {
+                  // The count belongs in the affordance: "Select all" on a
+                  // 42-app tab and on a 1-app tab used to be the same
+                  // mystery meat (docs/12 P0-5).
+                  final visible = _apps.currentApps;
+                  return IconButton(
+                    icon: const Icon(Icons.select_all),
+                    tooltip: l10n.selectAllInTab(
+                      visible.length,
+                      _apps.systemTab
+                          ? l10n.tabSystemAppsLabel
+                          : l10n.tabUserAppsLabel,
+                    ),
+                    onPressed: visible.isEmpty
+                        ? null
+                        : () => _apps.selectAll(visible),
+                  );
+                },
               ),
             ]
           : [

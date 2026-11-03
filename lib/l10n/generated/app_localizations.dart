@@ -553,6 +553,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No apps were removed'**
   String get uninstallNothingRemoved;
+
+  /// No description provided for @tabUserAppsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'User apps'**
+  String get tabUserAppsLabel;
+
+  /// No description provided for @tabSystemAppsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'System apps'**
+  String get tabSystemAppsLabel;
+
+  /// No description provided for @selectAllInTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all {count} in {tab}'**
+  String selectAllInTab(Object count, Object tab);
 }
 
 class _AppLocalizationsDelegate

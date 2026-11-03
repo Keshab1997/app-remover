@@ -55,6 +55,22 @@ class AppsController extends ChangeNotifier {
     return list;
   }
 
+  /// Which tab the user is looking at, kept here so that the widgets around
+  /// the list - the tab labels, "select all" - all agree on one answer.
+  /// Reading `TabController.index` at tap time is not enough: mid-swipe it
+  /// can still name the page being scrolled away from (docs/12 P0-5).
+  bool _systemTab = false;
+  bool get systemTab => _systemTab;
+
+  void setSystemTab(bool value) {
+    if (_systemTab == value) return;
+    _systemTab = value;
+    notifyListeners();
+  }
+
+  /// Everything the current tab shows, query and sort applied.
+  List<AppInfo> get currentApps => appsFor(system: _systemTab);
+
   int get selectedSize => _all
       .where((app) => _selected.contains(app.packageName))
       .fold(0, (sum, app) => sum + app.sizeBytes);
