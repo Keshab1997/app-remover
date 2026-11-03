@@ -223,8 +223,8 @@ strip। দুটো অ্যাডাপ্টেশন:
 
 ## P2-15 — Uninstall-এ popup কমানো (user drop-off)
 
-আগে: app खुদ একটা confirm dialog, তারপর Android-এর own dialog — মানে একটা app
-मुছতেই ২টা popup, ৬টা select করলে ৭টা। Android-এর dialogটা সাধারণ app
+আগে: app নিজেই একটা confirm dialog দেখাত, তারপর Android-এর own dialog — মানে একটা app
+মুছতেই ২টা popup, ৬টা select করলে ৭টা। Android-এর dialogটা সাধারণ app
 skip করতে পারে না (package installer-এর own confirmation, `REQUEST_DELETE_PACKAGES`
 শুধু নিজের app-এর জন্য), তাই বাঁচানো যায় শুধু যেটা আমরা নিজে যোগ করি।
 
