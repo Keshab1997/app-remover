@@ -73,7 +73,6 @@
   "sizesHintTitle": "সঠিক সাইজের জন্য usage access লাগে",
   "enable": "চালু করুন",
   "noThanks": "লাগবে না",
-  "uninstallSummary": "{count, plural, =1 {একটি অ্যাপ} other {#টি অ্যাপ}} মুছে {size} জায়গা খালি হয়েছে",
   "@uninstallSummary": {
     "placeholders": {
       "size": {
@@ -104,5 +103,35 @@
   "filterRecent": "সম্প্রতি ইনস্টল",
   "notOpenedSince": "{date}-এর পর খোলা হয়নি",
   "filtersMatchNothing": "এই ফিল্টারে কিছু মেলেনি",
-  "clearFilters": "ফিল্টার মুছুন"
+  "clearFilters": "ফিল্টার মুছুন",
+  "appsShownOf": "{total}টির মধ্যে {shown}টি অ্যাপ দেখাচ্ছে",
+  "@appsShownOf": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "uninstallSummaryOne": "একটি অ্যাপ মুছে {size} জায়গা খালি হয়েছে",
+  "@uninstallSummaryOne": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "uninstallSummaryMany": "{count}টি অ্যাপ মুছে {size} জায়গা খালি হয়েছে",
+  "@uninstallSummaryMany": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

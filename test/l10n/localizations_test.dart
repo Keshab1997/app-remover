@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:goodbye_apps/l10n/generated/app_localizations.dart';
@@ -55,6 +57,9 @@ void main() {
         en.appsAndSize(2, '1.5 MB'),
         en.usedOfTotal('3.0 GB', '6.0 GB'),
         en.versionAndSize('1.0', '12.0 MB'),
+        en.appsShownOf(1, 2),
+        en.uninstallSummaryOne('12 MB'),
+        en.uninstallSummaryMany('1.4 GB', 6),
       ],
       [
         '3 selected',
@@ -63,6 +68,9 @@ void main() {
         '2 apps • 1.5 MB',
         '3.0 GB / 6.0 GB used',
         'v1.0 • 12.0 MB',
+        'Showing 1 of 2 apps',
+        'Freed 12 MB from one app',
+        'Freed 1.4 GB from 6 apps',
       ],
     );
 
@@ -82,6 +90,19 @@ void main() {
         '3.0 GB / 6.0 GB ব্যবহৃত',
       ],
     );
+  });
+
+  test('nothing renders a literal # for a count', () {
+    // gen-l10n lifts an ICU plural into Intl.pluralLogic and copies the branch
+    // text verbatim, so a "#" in a plural that also takes another placeholder
+    // survives as a literal hash on screen: "Freed 1.4 GB from # apps". The
+    // generated files are the only place that shows it.
+    for (final locale in ['en', 'bn']) {
+      final source = File('lib/l10n/generated/app_localizations_$locale.dart')
+          .readAsStringSync();
+      expect(source, isNot(contains("'#")));
+      expect(source, isNot(contains("#'")));
+    }
   });
 }
 

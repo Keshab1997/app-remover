@@ -182,6 +182,53 @@ void main() {
     expect(find.text('Nothing matches these filters'), findsNothing);
   });
 
+  testWidgets('search is a search field, and the list counts what it shows', (
+    tester,
+  ) async {
+    rows = [
+      {
+        'packageName': 'com.example.maps',
+        'label': 'Maps',
+        'isSystem': false,
+        'sizeBytes': 100,
+        'firstInstallTime': 1,
+        'lastUpdateTime': 1,
+        'versionName': '1.0',
+        'versionCode': 1,
+      },
+      {
+        'packageName': 'com.example.games',
+        'label': 'Games',
+        'isSystem': false,
+        'sizeBytes': 100,
+        'firstInstallTime': 1,
+        'lastUpdateTime': 1,
+        'versionName': '1.0',
+        'versionCode': 1,
+      },
+    ];
+    await open(tester);
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
+    final field = tester.widget<TextField>(find.byType(TextField));
+    expect(field.textInputAction, TextInputAction.search);
+    expect(field.textCapitalization, TextCapitalization.none);
+    expect(
+      tester
+          .widget<ListView>(find.byType(ListView).first)
+          .keyboardDismissBehavior,
+      ScrollViewKeyboardDismissBehavior.onDrag,
+      reason: 'the keyboard must not sit over the list',
+    );
+
+    expect(find.textContaining('Showing'), findsNothing);
+    await tester.enterText(find.byType(TextField), 'map');
+    await tester.pumpAndSettle();
+    expect(find.text('Showing 1 of 2 apps'), findsOneWidget);
+  });
+
   testWidgets('an empty list is still pull-to-refreshable', (tester) async {
     await open(tester);
 

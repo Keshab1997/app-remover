@@ -536,12 +536,6 @@ abstract class AppLocalizations {
   /// **'No thanks'**
   String get noThanks;
 
-  /// No description provided for @uninstallSummary.
-  ///
-  /// In en, this message translates to:
-  /// **'Freed {size} from {count, plural, =1 {one app} other {# apps}}'**
-  String uninstallSummary(String size, int count);
-
   /// No description provided for @uninstallingProgress.
   ///
   /// In en, this message translates to:
@@ -596,12 +590,6 @@ abstract class AppLocalizations {
   /// **'Not opened since {date}'**
   String notOpenedSince(Object date);
 
-  /// No description provided for @neverOpened.
-  ///
-  /// In en, this message translates to:
-  /// **'Not opened in the last year'**
-  String get neverOpened;
-
   /// No description provided for @filtersMatchNothing.
   ///
   /// In en, this message translates to:
@@ -613,6 +601,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clear filters'**
   String get clearFilters;
+
+  /// No description provided for @appsShownOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing {shown} of {total} apps'**
+  String appsShownOf(int shown, int total);
+
+  /// No description provided for @uninstallSummaryOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Freed {size} from one app'**
+  String uninstallSummaryOne(String size);
+
+  /// No description provided for @uninstallSummaryMany.
+  ///
+  /// In en, this message translates to:
+  /// **'Freed {size} from {count} apps'**
+  String uninstallSummaryMany(String size, int count);
 }
 
 class _AppLocalizationsDelegate

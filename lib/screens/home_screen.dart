@@ -167,6 +167,12 @@ class _HomeScreenState extends State<HomeScreen>
       title: TextField(
         controller: _search,
         autofocus: true,
+        // Filtering is live, so the keyboard's action button has nothing to
+        // submit: its job is to get out of the way.
+        textInputAction: TextInputAction.search,
+        textCapitalization: TextCapitalization.none,
+        autofillHints: const [],
+        onSubmitted: (_) => FocusManager.instance.primaryFocus?.unfocus(),
         decoration: InputDecoration(
           hintText: l10n.searchApps,
           border: InputBorder.none,
@@ -248,10 +254,29 @@ class _HomeScreenState extends State<HomeScreen>
     return _refreshable(
       Column(
         children: [
+          if (_apps.narrowing)
+            Padding(
+              // "No matches" tells you nothing went wrong; this tells you how
+              // much did. Only while something is narrowing the list - the tab
+              // labels already carry the counts otherwise.
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  l10n.appsShownOf(apps.length, _apps.installedCount),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ),
           _filterChips(),
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.only(top: 8, bottom: 96),
+              // A keyboard left up over a list the user is trying to read hides
+              // three or four rows; the first drag closes it (docs/12 P1-8).
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               itemCount: apps.length,
               itemBuilder: (context, index) {
                 final app = apps[index];
@@ -438,6 +463,9 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<void> _showActions(AppInfo app) async {
+    // Tapping a row is a decision to look at something else: the keyboard
+    // should already be gone by the time the sheet is over it.
+    FocusManager.instance.primaryFocus?.unfocus();
     final scheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context);
     await showModalBottomSheet<void>(
@@ -616,13 +644,16 @@ class _HomeScreenState extends State<HomeScreen>
       return;
     }
     await HapticFeedback.mediumImpact();
+    // One or many, told apart in Dart: gen-l10n cannot substitute the "#" of a
+    // plural in a message that also takes another placeholder, so the two forms
+    // cannot share one ICU plural here.
+    final freed = formatBytes(summary.freedBytes);
     messenger.showSnackBar(
       SnackBar(
         content: Text(
-          l10n.uninstallSummary(
-            formatBytes(summary.freedBytes),
-            summary.removed,
-          ),
+          summary.removed == 1
+              ? l10n.uninstallSummaryOne(freed)
+              : l10n.uninstallSummaryMany(freed, summary.removed),
         ),
       ),
     );

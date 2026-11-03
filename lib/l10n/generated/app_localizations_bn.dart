@@ -250,17 +250,6 @@ class AppLocalizationsBn extends AppLocalizations {
   String get noThanks => 'লাগবে না';
 
   @override
-  String uninstallSummary(String size, int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '#টি অ্যাপ',
-      one: 'একটি অ্যাপ',
-    );
-    return '$_temp0 মুছে $size জায়গা খালি হয়েছে';
-  }
-
-  @override
   String uninstallingProgress(int done, int total) {
     return '$totalটির মধ্যে $doneটি সরানো হচ্ছে';
   }
@@ -294,11 +283,23 @@ class AppLocalizationsBn extends AppLocalizations {
   }
 
   @override
-  String get neverOpened => 'গত এক বছরে খোলা হয়নি';
-
-  @override
   String get filtersMatchNothing => 'এই ফিল্টারে কিছু মেলেনি';
 
   @override
   String get clearFilters => 'ফিল্টার মুছুন';
+
+  @override
+  String appsShownOf(int shown, int total) {
+    return '$totalটির মধ্যে $shownটি অ্যাপ দেখাচ্ছে';
+  }
+
+  @override
+  String uninstallSummaryOne(String size) {
+    return 'একটি অ্যাপ মুছে $size জায়গা খালি হয়েছে';
+  }
+
+  @override
+  String uninstallSummaryMany(String size, int count) {
+    return '$countটি অ্যাপ মুছে $size জায়গা খালি হয়েছে';
+  }
 }

@@ -249,17 +249,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noThanks => 'No thanks';
 
   @override
-  String uninstallSummary(String size, int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '# apps',
-      one: 'one app',
-    );
-    return 'Freed $size from $_temp0';
-  }
-
-  @override
   String uninstallingProgress(int done, int total) {
     return 'Removing $done of $total';
   }
@@ -293,11 +282,23 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get neverOpened => 'Not opened in the last year';
-
-  @override
   String get filtersMatchNothing => 'Nothing matches these filters';
 
   @override
   String get clearFilters => 'Clear filters';
+
+  @override
+  String appsShownOf(int shown, int total) {
+    return 'Showing $shown of $total apps';
+  }
+
+  @override
+  String uninstallSummaryOne(String size) {
+    return 'Freed $size from one app';
+  }
+
+  @override
+  String uninstallSummaryMany(String size, int count) {
+    return 'Freed $size from $count apps';
+  }
 }

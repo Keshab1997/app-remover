@@ -147,7 +147,6 @@
   "sizesHintTitle": "Exact sizes need usage access",
   "enable": "Enable",
   "noThanks": "No thanks",
-  "uninstallSummary": "Freed {size} from {count, plural, =1 {one app} other {# apps}}",
   "@uninstallSummary": {
     "placeholders": {
       "size": {
@@ -178,5 +177,35 @@
   "filterRecent": "Installed recently",
   "notOpenedSince": "Not opened since {date}",
   "filtersMatchNothing": "Nothing matches these filters",
-  "clearFilters": "Clear filters"
+  "clearFilters": "Clear filters",
+  "appsShownOf": "Showing {shown} of {total} apps",
+  "@appsShownOf": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "uninstallSummaryOne": "Freed {size} from one app",
+  "@uninstallSummaryOne": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "uninstallSummaryMany": "Freed {size} from {count} apps",
+  "@uninstallSummaryMany": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
