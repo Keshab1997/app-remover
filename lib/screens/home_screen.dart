@@ -689,10 +689,13 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.memory,
-                      size: 16,
-                      color: scheme.onSurfaceVariant,
+                    Tooltip(
+                      message: l10n.ramNotStorage,
+                      child: Icon(
+                        Icons.memory,
+                        size: 16,
+                        color: scheme.onSurfaceVariant,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     // Every text in this row can be ellipsised: at 420 dp, or
@@ -774,6 +777,9 @@ class _HomeScreenState extends State<HomeScreen>
                   l10n.deviceMemory,
                   style: Theme.of(sheetContext).textTheme.titleMedium,
                 ),
+                // The bar sits under a list of app *sizes*, so "memory" on its
+                // own read as storage. Say which memory this is, out loud.
+                subtitle: Text(l10n.ramNotStorage),
               ),
               ListTile(
                 leading: const Icon(Icons.bolt_outlined),

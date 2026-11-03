@@ -43,7 +43,7 @@
   "cancel": "Cancel",
   "settings": "Settings",
   "refresh": "Refresh",
-  "refreshMemory": "Refresh memory",
+  "refreshMemory": "Refresh RAM",
   "selectAll": "Select all",
   "cancelSelection": "Cancel selection",
   "selectedCount": "{count} selected",
@@ -65,7 +65,7 @@
       }
     }
   },
-  "freeMemory": "Free memory",
+  "freeMemory": "Free RAM",
   "usedOfTotal": "{used} / {total} used",
   "@usedOfTotal": {
     "placeholders": {
@@ -121,8 +121,8 @@
   "light": "Light",
   "dark": "Dark",
   "statusBarToggle": "Status bar notification",
-  "statusBarOn": "Free memory in the tray, refreshed with the list",
-  "statusBarOff": "Show free memory in the tray",
+  "statusBarOn": "Free RAM in the tray, refreshed with the list",
+  "statusBarOff": "Show free RAM in the tray",
   "notificationsOffTitle": "Notifications are off",
   "notificationsOffBody": "Allow notifications for Goodbye Apps in system settings, then turn this back on.",
   "openSettings": "Open settings",
@@ -198,9 +198,9 @@
       }
     }
   },
-  "deviceMemory": "Device memory",
-  "memoryUsed": "Used",
-  "memoryTotal": "Total",
+  "deviceMemory": "Device RAM",
+  "memoryUsed": "RAM used",
+  "memoryTotal": "Total RAM",
   "sortName": "Name",
   "sortDate": "Date",
   "sortSize": "Size",
@@ -216,5 +216,7 @@
   },
   "worksOffline": "Works offline. Nothing leaves your phone.",
   "dismiss": "Dismiss",
-  "clearRecentSearches": "Clear recent searches"
+  "clearRecentSearches": "Clear recent searches",
+  "ramNotStorage": "RAM (working memory) — not storage space",
+  "madeBy": "Made by KeshabStudios"
 }

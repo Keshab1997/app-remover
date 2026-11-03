@@ -23,12 +23,12 @@
   "cancel": "বাতিল",
   "settings": "সেটিংস",
   "refresh": "রিফ্রেশ",
-  "refreshMemory": "মেমোরি রিফ্রেশ করুন",
+  "refreshMemory": "RAM রিফ্রেশ করুন",
   "selectAll": "সব নির্বাচন করুন",
   "cancelSelection": "নির্বাচন বাতিল",
   "selectedCount": "{count}টি নির্বাচিত",
   "appsAndSize": "{count}টি অ্যাপ • {size}",
-  "freeMemory": "ফ্রি মেমোরি",
+  "freeMemory": "ফ্রি RAM",
   "usedOfTotal": "{used} / {total} ব্যবহৃত",
   "uninstall": "আনইনস্টল",
   "tapAgainToUninstall": "নিশ্চিত করতে আবার চাপুন",
@@ -54,8 +54,8 @@
   "light": "লাইট",
   "dark": "ডার্ক",
   "statusBarToggle": "স্ট্যাটাস বার নোটিফিকেশন",
-  "statusBarOn": "ট্রে-তে ফ্রি মেমোরি, লিস্ট রিফ্রেশের সাথে আপডেট হয়",
-  "statusBarOff": "ট্রে-তে ফ্রি মেমোরি দেখান",
+  "statusBarOn": "ট্রে-তে ফ্রি RAM, লিস্ট রিফ্রেশের সাথে আপডেট হয়",
+  "statusBarOff": "ট্রে-তে ফ্রি RAM দেখান",
   "notificationsOffTitle": "নোটিফিকেশন বন্ধ আছে",
   "notificationsOffBody": "সিস্টেম সেটিংসে Goodbye Apps-এর নোটিফিকেশন চালু করে, তারপর এটা আবার অন করুন।",
   "openSettings": "সেটিংস খুলুন",
@@ -124,9 +124,9 @@
       }
     }
   },
-  "deviceMemory": "ডিভাইসের মেমরি",
-  "memoryUsed": "ব্যবহৃত",
-  "memoryTotal": "মোট",
+  "deviceMemory": "ডিভাইসের RAM",
+  "memoryUsed": "RAM ব্যবহৃত",
+  "memoryTotal": "মোট RAM",
   "sortName": "নাম",
   "sortDate": "তারিখ",
   "sortSize": "সাইজ",
@@ -142,5 +142,7 @@
   },
   "worksOffline": "অফলাইনে কাজ করে। কিছুই ফোনের বাইরে যায় না।",
   "dismiss": "মুছে দিন",
-  "clearRecentSearches": "সাম্প্রতিক সার্চ মুছুন"
+  "clearRecentSearches": "সাম্প্রতিক সার্চ মুছুন",
+  "ramNotStorage": "RAM (কাজের মেমোরি) — স্টোরেজ নয়",
+  "madeBy": "তৈরি করেছে KeshabStudios"
 }

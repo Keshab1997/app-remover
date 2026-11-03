@@ -310,11 +310,15 @@ void main() {
     // The bar used to ship its own 18 px refresh next to the app bar's.
     expect(find.byIcon(Icons.refresh), findsOneWidget);
 
-    await tester.tap(find.text('Free memory'));
+    await tester.tap(find.text('Free RAM'));
     await tester.pumpAndSettle();
-    expect(find.text('Device memory'), findsOneWidget);
-    expect(find.text('Used'), findsOneWidget);
-    expect(find.text('Total'), findsOneWidget);
+    expect(find.text('Device RAM'), findsOneWidget);
+    expect(
+      find.text('RAM (working memory) — not storage space'),
+      findsOneWidget,
+    );
+    expect(find.text('RAM used'), findsOneWidget);
+    expect(find.text('Total RAM'), findsOneWidget);
     // 4000 - 1000 bytes from the mocked ActivityManager.
     expect(find.text('2.9 KB / 3.9 KB used'), findsOneWidget);
   });

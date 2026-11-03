@@ -83,7 +83,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get refresh => 'রিফ্রেশ';
 
   @override
-  String get refreshMemory => 'মেমোরি রিফ্রেশ করুন';
+  String get refreshMemory => 'RAM রিফ্রেশ করুন';
 
   @override
   String get selectAll => 'সব নির্বাচন করুন';
@@ -102,7 +102,7 @@ class AppLocalizationsBn extends AppLocalizations {
   }
 
   @override
-  String get freeMemory => 'ফ্রি মেমোরি';
+  String get freeMemory => 'ফ্রি RAM';
 
   @override
   String usedOfTotal(String used, String total) {
@@ -187,11 +187,10 @@ class AppLocalizationsBn extends AppLocalizations {
   String get statusBarToggle => 'স্ট্যাটাস বার নোটিফিকেশন';
 
   @override
-  String get statusBarOn =>
-      'ট্রে-তে ফ্রি মেমোরি, লিস্ট রিফ্রেশের সাথে আপডেট হয়';
+  String get statusBarOn => 'ট্রে-তে ফ্রি RAM, লিস্ট রিফ্রেশের সাথে আপডেট হয়';
 
   @override
-  String get statusBarOff => 'ট্রে-তে ফ্রি মেমোরি দেখান';
+  String get statusBarOff => 'ট্রে-তে ফ্রি RAM দেখান';
 
   @override
   String get notificationsOffTitle => 'নোটিফিকেশন বন্ধ আছে';
@@ -304,13 +303,13 @@ class AppLocalizationsBn extends AppLocalizations {
   }
 
   @override
-  String get deviceMemory => 'ডিভাইসের মেমরি';
+  String get deviceMemory => 'ডিভাইসের RAM';
 
   @override
-  String get memoryUsed => 'ব্যবহৃত';
+  String get memoryUsed => 'RAM ব্যবহৃত';
 
   @override
-  String get memoryTotal => 'মোট';
+  String get memoryTotal => 'মোট RAM';
 
   @override
   String get sortName => 'নাম';
@@ -340,4 +339,10 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get clearRecentSearches => 'সাম্প্রতিক সার্চ মুছুন';
+
+  @override
+  String get ramNotStorage => 'RAM (কাজের মেমোরি) — স্টোরেজ নয়';
+
+  @override
+  String get madeBy => 'তৈরি করেছে KeshabStudios';
 }

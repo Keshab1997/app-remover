@@ -239,7 +239,7 @@ abstract class AppLocalizations {
   /// No description provided for @refreshMemory.
   ///
   /// In en, this message translates to:
-  /// **'Refresh memory'**
+  /// **'Refresh RAM'**
   String get refreshMemory;
 
   /// No description provided for @selectAll.
@@ -269,7 +269,7 @@ abstract class AppLocalizations {
   /// No description provided for @freeMemory.
   ///
   /// In en, this message translates to:
-  /// **'Free memory'**
+  /// **'Free RAM'**
   String get freeMemory;
 
   /// No description provided for @usedOfTotal.
@@ -425,13 +425,13 @@ abstract class AppLocalizations {
   /// No description provided for @statusBarOn.
   ///
   /// In en, this message translates to:
-  /// **'Free memory in the tray, refreshed with the list'**
+  /// **'Free RAM in the tray, refreshed with the list'**
   String get statusBarOn;
 
   /// No description provided for @statusBarOff.
   ///
   /// In en, this message translates to:
-  /// **'Show free memory in the tray'**
+  /// **'Show free RAM in the tray'**
   String get statusBarOff;
 
   /// No description provided for @notificationsOffTitle.
@@ -623,19 +623,19 @@ abstract class AppLocalizations {
   /// No description provided for @deviceMemory.
   ///
   /// In en, this message translates to:
-  /// **'Device memory'**
+  /// **'Device RAM'**
   String get deviceMemory;
 
   /// No description provided for @memoryUsed.
   ///
   /// In en, this message translates to:
-  /// **'Used'**
+  /// **'RAM used'**
   String get memoryUsed;
 
   /// No description provided for @memoryTotal.
   ///
   /// In en, this message translates to:
-  /// **'Total'**
+  /// **'Total RAM'**
   String get memoryTotal;
 
   /// No description provided for @sortName.
@@ -691,6 +691,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clear recent searches'**
   String get clearRecentSearches;
+
+  /// No description provided for @ramNotStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'RAM (working memory) — not storage space'**
+  String get ramNotStorage;
+
+  /// No description provided for @madeBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Made by KeshabStudios'**
+  String get madeBy;
 }
 
 class _AppLocalizationsDelegate

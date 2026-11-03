@@ -83,7 +83,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get refresh => 'Refresh';
 
   @override
-  String get refreshMemory => 'Refresh memory';
+  String get refreshMemory => 'Refresh RAM';
 
   @override
   String get selectAll => 'Select all';
@@ -102,7 +102,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get freeMemory => 'Free memory';
+  String get freeMemory => 'Free RAM';
 
   @override
   String usedOfTotal(String used, String total) {
@@ -187,10 +187,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusBarToggle => 'Status bar notification';
 
   @override
-  String get statusBarOn => 'Free memory in the tray, refreshed with the list';
+  String get statusBarOn => 'Free RAM in the tray, refreshed with the list';
 
   @override
-  String get statusBarOff => 'Show free memory in the tray';
+  String get statusBarOff => 'Show free RAM in the tray';
 
   @override
   String get notificationsOffTitle => 'Notifications are off';
@@ -303,13 +303,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get deviceMemory => 'Device memory';
+  String get deviceMemory => 'Device RAM';
 
   @override
-  String get memoryUsed => 'Used';
+  String get memoryUsed => 'RAM used';
 
   @override
-  String get memoryTotal => 'Total';
+  String get memoryTotal => 'Total RAM';
 
   @override
   String get sortName => 'Name';
@@ -339,4 +339,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clearRecentSearches => 'Clear recent searches';
+
+  @override
+  String get ramNotStorage => 'RAM (working memory) — not storage space';
+
+  @override
+  String get madeBy => 'Made by KeshabStudios';
 }
