@@ -96455,10 +96455,10 @@ A.ayT.prototype={
 $0(){return A.agG(this.a.Np("https://play.google.com/store/apps/details?id=com.keshabstudios.goodbyeapps"))},
 $S:0}
 A.ayU.prototype={
-$0(){return A.AM("mailto:hello@goodbyeapps.com?subject=Goodbye%20Apps%20feedback")},
+$0(){return A.AM("mailto:Keshabsarkar2018@gmail.com?subject=Goodbye%20Apps%20feedback")},
 $S:0}
 A.ayV.prototype={
-$0(){return A.AM("https://goodbyeapps.com/privacy-policy")},
+$0(){return A.AM("https://keshab1997.github.io/goodbyeapps-legal/privacy-policy.html")},
 $S:0}
 A.ayW.prototype={
 $2(a,b){var s=null,r=b.b
